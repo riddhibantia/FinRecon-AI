@@ -1,0 +1,23 @@
+# P0 local services. PostgreSQL only. No Kafka. No Redis. No app builds here.
+# pgvector image keeps the P7 RAG option open without enabling RAG in P0.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: finrecon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-finrecon}
+      POSTGRES_USER: ${POSTGRES_USER:-finrecon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-finrecon}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

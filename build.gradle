@@ -1,0 +1,28 @@
+// FinRecon AI - P0 root build.
+// Shared Java 21 configuration for all Spring Boot skeletons.
+// No business logic. Spring Data JPA/JDBC arrives in P1.
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 21
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+        testLogging {
+            events 'passed', 'failed', 'skipped'
+        }
+    }
+}

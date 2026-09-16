@@ -1,0 +1,147 @@
+# FinRecon AI — P0 Project Foundation
+
+P0 only. Skeletons, health endpoints, and local run docs. No business logic.
+
+Spec: `Doc/FINRECON_MASTER.md` is authoritative. `Doc/AGENT_HANDOFF.md` is the execution order. `docs/` holds phase placeholders that get filled in later phases.
+
+## What P0 contains
+
+- 5 Spring Boot skeletons (Java 21, Spring Boot 3.2.5, Gradle): gateway, ingestion, reconciliation, exception, reporting. Each exposes `GET /api/health` and Actuator `GET /actuator/health`.
+- 1 FastAPI skeleton (`ai-service/app.py`): `GET /health`. Subpackages `classifier`, `rag`, `agent`, `tools`, `evaluation` are empty placeholders.
+- 1 Next.js skeleton (`frontend/`): home page plus `GET /api/health`.
+- `docker-compose.yml`: PostgreSQL only (pgvector image for future P7, RAG not enabled).
+- `db/migrations`, `db/seed`, `data/synthetic`, `data/evaluation`: empty placeholders.
+- `.env.template`, `.github/workflows/ci.yml`, `.editorconfig`, `.gitignore`.
+
+## What P0 does NOT contain
+
+No domain tables, migrations, canonical models, ingestion, matching, reconciliation rules, exception/case APIs, ML, RAG, LangGraph, fine-tuning, Kafka, Redis, Kubernetes, AWS, or dashboard logic. See `docs/DECISIONS.md`.
+
+## Prerequisites
+
+- Java 21 (`java -version`)
+- Gradle 8.9 (`gradle --version`). Maven is not required for P0.
+- Python 3.10+ (`python --version`). CI uses 3.11 per spec; P0 code runs on both.
+- Node 18+ (`node --version`), npm 9+.
+- Docker optional. Only needed for `docker compose up postgres`. Not required for P0 health checks.
+
+## Setup
+
+```powershell
+Copy-Item .env.template .env
+# Edit .env only for local passwords. Never commit .env.
+```
+
+Install and verify (Windows PowerShell from repo root):
+
+```powershell
+# Java builds + tests
+gradle build
+
+# Python health test (uses installed fastapi, pytest)
+cd ai-service
+python -m pytest tests -v
+cd ..
+
+# Frontend skeleton test (no install needed)
+cd frontend
+npm test
+cd ..
+```
+
+Full frontend check (downloads Next.js, takes a few minutes):
+
+```powershell
+cd frontend
+npm install
+npm run build
+cd ..
+```
+
+## Run locally (P0)
+
+Each service runs in its own terminal. No DB needed for health checks.
+
+```powershell
+# Terminal 1-5 (Java, one per service)
+gradle :services:gateway-service:bootRun
+gradle :services:ingestion-service:bootRun
+gradle :services:reconciliation-service:bootRun
+gradle :services:exception-service:bootRun
+gradle :services:reporting-service:bootRun
+
+# Terminal 6 (Python)
+cd ai-service
+python -m uvicorn app:app --port 8000
+cd ..
+
+# Terminal 7 (frontend)
+cd frontend
+npm install
+npm run dev
+cd ..
+```
+
+Postgres (optional, needs Docker):
+
+```powershell
+docker compose up postgres
+```
+
+## Health endpoints
+
+| Service | URL |
+|---|---|
+| gateway-service | http://localhost:8080/api/health and /actuator/health |
+| ingestion-service | http://localhost:8081/api/health and /actuator/health |
+| reconciliation-service | http://localhost:8082/api/health and /actuator/health |
+| exception-service | http://localhost:8083/api/health and /actuator/health |
+| reporting-service | http://localhost:8084/api/health and /actuator/health |
+| ai-service | http://localhost:8000/health |
+| frontend | http://localhost:3000/api/health |
+
+Expected shape: `{"status":"UP","service":"<name>"}`.
+
+Quick check:
+
+```powershell
+Invoke-RestMethod http://localhost:8080/api/health
+Invoke-RestMethod http://localhost:8000/health
+Invoke-RestMethod http://localhost:3000/api/health
+```
+
+## Project structure
+
+```text
+settings.gradle / build.gradle / gradle.properties
+services/gateway-service, ingestion-service, reconciliation-service, exception-service, reporting-service
+ai-service/app.py, classifier/, rag/, agent/, tools/, evaluation/, tests/
+frontend/app/, test/
+db/migrations, db/seed, data/synthetic, data/evaluation
+docs/PRD.md, TRD.md, ARCHITECTURE.md, DATABASE.md, EVENTS.md, ML.md, RAG.md, AGENT.md, SECURITY.md, TESTING.md, DECISIONS.md
+docker-compose.yml, .env.template, .github/workflows/ci.yml
+Doc/FINRECON_MASTER.md, Doc/AGENT_HANDOFF.md
+```
+
+## Conventions (P0)
+
+- Java: 4 spaces, UTF-8, `Application` + `HealthController` per service. `gradle build` must stay green.
+- Python: 4 spaces, FastAPI + pytest. `python -m pytest tests -v` must stay green.
+- Frontend: 2 spaces, TypeScript, App Router. `npm test` must stay green.
+- `.editorconfig` enforces charset, LF, final newline, trailing-whitespace trim.
+- Branching: one phase per branch, e.g. `p0/foundation`. Commit after each green phase before handoff.
+- Secrets: `.env` only, never committed. Synthetic data only.
+- One owner per file set at a time (OpenCore for P0-P5, OMP for P6-P9).
+
+## P0 exit check
+
+- [ ] `gradle build` passes (10 Java health tests)
+- [ ] `python -m pytest tests -v` passes (1 test)
+- [ ] `npm test` passes (2 tests)
+- [ ] Each service answers its health endpoint locally
+- [ ] `docker-compose.yml` defines postgres only (run manually where Docker exists)
+- [ ] No domain logic, migrations, ML, RAG, agent, Kafka, or Redis code present
+
+## Next step
+
+P1 only: canonical domain model, PostgreSQL migrations, constraints, indexes, seed data, and source fixtures. Do not start P2-P13.

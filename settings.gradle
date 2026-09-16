@@ -1,0 +1,7 @@
+rootProject.name = 'finrecon-ai'
+
+include 'services:gateway-service'
+include 'services:ingestion-service'
+include 'services:reconciliation-service'
+include 'services:exception-service'
+include 'services:reporting-service'
