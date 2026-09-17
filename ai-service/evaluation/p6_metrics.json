@@ -1,0 +1,790 @@
+{
+  "model_version": "p6-d92893deeb5ca075",
+  "selected_model": "logistic_regression",
+  "classes": [
+    "AMOUNT_MISMATCH",
+    "DUPLICATE_SETTLEMENT",
+    "FEE_VARIANCE",
+    "FX_VARIANCE",
+    "LATE_SETTLEMENT",
+    "MISSING_SETTLEMENT",
+    "PARTIAL_SETTLEMENT",
+    "STATUS_MISMATCH",
+    "UNKNOWN_EXCEPTION"
+  ],
+  "dataset_lineage": {
+    "format": "p6-dataset-v1",
+    "seed": 17,
+    "groups": 200,
+    "rows": 3000,
+    "matched_excluded": 200,
+    "dataset_sha256": "d028923dcc240b76d55b2b503cfecc488121b29cd0a7ef54c2192496a4cf2dfb",
+    "label_authority": "unchanged ReconciliationEngine.reconcile",
+    "bootjar_sha256": "172f887aa9fcdb9f5d232e898a11a4c3d416ecf4cab61194e60059179b9ba5e2",
+    "engine_source_sha256": "8213d073538f46136993e28ba125db06e5f10e786f38404edf5450e0b84156e3",
+    "bridge_sha256": "d895393b2ce35daf2ce3c63aa6416a9fec5275f8b6269b7c7fba8ca4154837fd",
+    "generator_sha256": "eb81dbe726334500acf89f81750964b59661f8ee6221fcf9b9269ceb84723550",
+    "rule_versions": [
+      "1.0.0"
+    ],
+    "window_days": [
+      2
+    ],
+    "split": "seeded payment-family shuffle; 70% train, 15% validation, 15% test; all mutations grouped",
+    "limitations": "Synthetic mutations of P3 fixtures; not real operational accuracy or novel-fault generalization."
+  },
+  "validation": {
+    "logistic_regression": {
+      "macro_f1": 1.0,
+      "per_class": {
+        "AMOUNT_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 90.0
+        },
+        "DUPLICATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FEE_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FX_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "LATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "MISSING_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "PARTIAL_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "STATUS_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "UNKNOWN_EXCEPTION": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          90,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30
+        ]
+      ],
+      "confusion_order": [
+        "AMOUNT_MISMATCH",
+        "DUPLICATE_SETTLEMENT",
+        "FEE_VARIANCE",
+        "FX_VARIANCE",
+        "LATE_SETTLEMENT",
+        "MISSING_SETTLEMENT",
+        "PARTIAL_SETTLEMENT",
+        "STATUS_MISMATCH",
+        "UNKNOWN_EXCEPTION"
+      ],
+      "log_loss": 0.008074484866095836,
+      "multiclass_brier": 0.00037626308149373293,
+      "rows": 450
+    },
+    "xgboost": {
+      "macro_f1": 1.0,
+      "per_class": {
+        "AMOUNT_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 90.0
+        },
+        "DUPLICATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FEE_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FX_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "LATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "MISSING_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "PARTIAL_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "STATUS_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "UNKNOWN_EXCEPTION": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          90,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30
+        ]
+      ],
+      "confusion_order": [
+        "AMOUNT_MISMATCH",
+        "DUPLICATE_SETTLEMENT",
+        "FEE_VARIANCE",
+        "FX_VARIANCE",
+        "LATE_SETTLEMENT",
+        "MISSING_SETTLEMENT",
+        "PARTIAL_SETTLEMENT",
+        "STATUS_MISMATCH",
+        "UNKNOWN_EXCEPTION"
+      ],
+      "log_loss": 0.0024049207198175602,
+      "multiclass_brier": 8.866200748798547e-06,
+      "rows": 450
+    }
+  },
+  "heldout": {
+    "logistic_regression": {
+      "macro_f1": 1.0,
+      "per_class": {
+        "AMOUNT_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 90.0
+        },
+        "DUPLICATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FEE_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FX_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "LATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "MISSING_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "PARTIAL_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "STATUS_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "UNKNOWN_EXCEPTION": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          90,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30
+        ]
+      ],
+      "confusion_order": [
+        "AMOUNT_MISMATCH",
+        "DUPLICATE_SETTLEMENT",
+        "FEE_VARIANCE",
+        "FX_VARIANCE",
+        "LATE_SETTLEMENT",
+        "MISSING_SETTLEMENT",
+        "PARTIAL_SETTLEMENT",
+        "STATUS_MISMATCH",
+        "UNKNOWN_EXCEPTION"
+      ],
+      "log_loss": 0.008935514609868904,
+      "multiclass_brier": 0.00042664587755530383,
+      "rows": 450
+    },
+    "xgboost": {
+      "macro_f1": 1.0,
+      "per_class": {
+        "AMOUNT_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 90.0
+        },
+        "DUPLICATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FEE_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "FX_VARIANCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "LATE_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "MISSING_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "PARTIAL_SETTLEMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "STATUS_MISMATCH": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        },
+        "UNKNOWN_EXCEPTION": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          90,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          60,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30
+        ]
+      ],
+      "confusion_order": [
+        "AMOUNT_MISMATCH",
+        "DUPLICATE_SETTLEMENT",
+        "FEE_VARIANCE",
+        "FX_VARIANCE",
+        "LATE_SETTLEMENT",
+        "MISSING_SETTLEMENT",
+        "PARTIAL_SETTLEMENT",
+        "STATUS_MISMATCH",
+        "UNKNOWN_EXCEPTION"
+      ],
+      "log_loss": 0.0024084641915270177,
+      "multiclass_brier": 9.097535916077821e-06,
+      "rows": 450
+    }
+  },
+  "splits": {
+    "train": {
+      "rows": 2100,
+      "groups": 140,
+      "classes": {
+        "DUPLICATE_SETTLEMENT": 280,
+        "MISSING_SETTLEMENT": 280,
+        "AMOUNT_MISMATCH": 420,
+        "UNKNOWN_EXCEPTION": 140,
+        "FEE_VARIANCE": 280,
+        "PARTIAL_SETTLEMENT": 140,
+        "FX_VARIANCE": 280,
+        "STATUS_MISMATCH": 140,
+        "LATE_SETTLEMENT": 140
+      }
+    },
+    "validation": {
+      "rows": 450,
+      "groups": 30,
+      "classes": {
+        "DUPLICATE_SETTLEMENT": 60,
+        "MISSING_SETTLEMENT": 60,
+        "AMOUNT_MISMATCH": 90,
+        "UNKNOWN_EXCEPTION": 30,
+        "FEE_VARIANCE": 60,
+        "PARTIAL_SETTLEMENT": 30,
+        "FX_VARIANCE": 60,
+        "STATUS_MISMATCH": 30,
+        "LATE_SETTLEMENT": 30
+      }
+    },
+    "test": {
+      "rows": 450,
+      "groups": 30,
+      "classes": {
+        "DUPLICATE_SETTLEMENT": 60,
+        "MISSING_SETTLEMENT": 60,
+        "AMOUNT_MISMATCH": 90,
+        "UNKNOWN_EXCEPTION": 30,
+        "FEE_VARIANCE": 60,
+        "PARTIAL_SETTLEMENT": 30,
+        "FX_VARIANCE": 60,
+        "STATUS_MISMATCH": 30,
+        "LATE_SETTLEMENT": 30
+      }
+    }
+  },
+  "leakage_checks": {
+    "payment_groups_disjoint": true,
+    "identical_snapshots_disjoint": true,
+    "preprocessing_fit": "train only",
+    "label_fields_in_features": false
+  },
+  "confidence_note": "Raw model probabilities, not calibrated operational certainty. Brier and log loss are synthetic heldout diagnostics."
+}
