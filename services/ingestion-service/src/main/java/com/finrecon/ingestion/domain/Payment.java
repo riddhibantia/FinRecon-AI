@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 // P1 canonical entity for the payments table (V1 migration).
@@ -43,7 +44,7 @@ public class Payment {
     @Column(name = "event_time", nullable = false)
     private OffsetDateTime eventTime;
 
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     protected Payment() {
@@ -95,5 +96,12 @@ public class Payment {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @PrePersist
+    protected void prePersist() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
     }
 }

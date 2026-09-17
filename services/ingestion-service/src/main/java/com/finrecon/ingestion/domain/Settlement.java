@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 // P1 canonical entity for the settlements table (V1 migration).
@@ -48,7 +49,7 @@ public class Settlement {
     @Column(name = "batch_id", nullable = false)
     private String batchId;
 
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     protected Settlement() {
@@ -100,5 +101,12 @@ public class Settlement {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @PrePersist
+    protected void prePersist() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
     }
 }

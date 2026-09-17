@@ -110,6 +110,30 @@ Invoke-RestMethod http://localhost:8000/health
 Invoke-RestMethod http://localhost:3000/api/health
 ```
 
+## P2 ingestion (ingestion-service :8081, needs PostgreSQL at runtime)
+
+JSON batch endpoints (`application/json` array, 200 with counts; 400 on
+empty/unparseable body):
+
+- `POST /api/ingest/payments`
+- `POST /api/ingest/ledger-entries`
+- `POST /api/ingest/settlements`
+
+CSV upload endpoints (`multipart/form-data`, field `file`, header row required):
+
+- `POST /api/ingest/payments/csv` — columns:
+  `external_txn_id,customer_id,merchant_id,amount,currency,status,event_time`
+- `POST /api/ingest/ledger-entries/csv` — columns:
+  `external_txn_id,gross_amount,fee_amount,net_amount,currency,posting_status,posted_at`
+- `POST /api/ingest/settlements/csv` — columns:
+  `external_txn_id,settled_amount,fee_amount,currency,settlement_status,settlement_date,batch_id`
+
+Ledger/settlement rows reference the payment by `external_txn_id`; unknown
+references are rejected. Every response is a `BatchResult`
+(`requestId,sourceType,status,accepted,duplicates,rejected,errors[]`) and
+carries `X-Request-Id`. Repeats are idempotent (payments via
+`UNIQUE(external_txn_id)`; ledger/settlement via exact-duplicate match).
+
 ## Project structure
 
 ```text

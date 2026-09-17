@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 // P1 canonical entity for the ledger_entries table (V1 migration).
@@ -47,7 +48,7 @@ public class LedgerEntry {
     @Column(name = "posted_at", nullable = false)
     private OffsetDateTime postedAt;
 
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     protected LedgerEntry() {
@@ -99,5 +100,12 @@ public class LedgerEntry {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @PrePersist
+    protected void prePersist() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
     }
 }

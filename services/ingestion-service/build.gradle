@@ -11,6 +11,8 @@ dependencies {
     // db/migrations via Flyway; Hibernate only validates (see properties).
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.flywaydb:flyway-core'
+    // P2: RFC-4180 CSV parsing for gateway/ledger/settlement files.
+    implementation 'org.apache.commons:commons-csv:1.10.0'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     // H2 serves @SpringBootTest only (Flyway off, create-drop). It never
