@@ -7,5 +7,6 @@ numpy==2.2.6
 scikit-learn==1.7.2
 xgboost==3.0.5
 joblib==1.5.2
-langchain-core==0.3.83
+langchain-core==1.4.7
 psycopg[binary]==3.2.10
+langgraph==1.2.11
