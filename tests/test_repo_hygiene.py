@@ -13,7 +13,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 
 CARD_RUN = re.compile(r"\d{13,19}")
-PRIVATE_KEY = re.compile(r"-----BEGIN .*PRIVATE KEY")
+# Keywords split across literals so this file never matches its own
+# pattern now that it is tracked by git.
+_BEGIN = "-----BEG" + "IN "
+_KEY = "PRIV" + "ATE KEY"
+PRIVATE_KEY = re.compile(_BEGIN + ".*" + _KEY)
 PASSWORD_LINE = re.compile(r"^\s*[\w.]*password[\w.]*\s*[:=]\s*(.+?)\s*$",
                             re.IGNORECASE)
 LOCAL_DEFAULTS = {"changeme", ""}

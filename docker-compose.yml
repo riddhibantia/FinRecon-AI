@@ -1,5 +1,6 @@
 # P5 local services. Postgres always; Kafka + Redis for the P5 async path.
 # pgvector image keeps the P7 RAG option open without enabling RAG.
+# P12 app services below (gateway/reporting join when they serve traffic).
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -51,6 +52,99 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # P12: application services. Build with `docker compose up --build`.
+  # Messaging stays off unless enabled; see OPERATIONS.md.
+  ingestion-service:
+    build:
+      context: .
+      dockerfile: services/ingestion-service/Dockerfile
+    container_name: finrecon-ingestion
+    restart: unless-stopped
+    ports:
+      - "${INGESTION_PORT:-8081}:8081"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-finrecon}
+      POSTGRES_USER: ${POSTGRES_USER:-finrecon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      FRONTEND_ORIGIN: http://localhost:${FRONTEND_PORT:-3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  reconciliation-service:
+    build:
+      context: .
+      dockerfile: services/reconciliation-service/Dockerfile
+    container_name: finrecon-reconciliation
+    restart: unless-stopped
+    ports:
+      - "${RECONCILIATION_PORT:-8082}:8082"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-finrecon}
+      POSTGRES_USER: ${POSTGRES_USER:-finrecon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      FRONTEND_ORIGIN: http://localhost:${FRONTEND_PORT:-3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  exception-service:
+    build:
+      context: .
+      dockerfile: services/exception-service/Dockerfile
+    container_name: finrecon-exception
+    restart: unless-stopped
+    ports:
+      - "${EXCEPTION_PORT:-8083}:8083"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-finrecon}
+      POSTGRES_USER: ${POSTGRES_USER:-finrecon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      FRONTEND_ORIGIN: http://localhost:${FRONTEND_PORT:-3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: ai-service/Dockerfile
+    container_name: finrecon-ai
+    restart: unless-stopped
+    ports:
+      - "${AI_SERVICE_PORT:-8000}:8000"
+    environment:
+      FINRECON_CASE_API_URL: http://exception-service:8083
+      FINRECON_MODEL_DIR: /models
+    volumes:
+      - ./ai-service/artifacts/p6/models:/models:ro
+    depends_on:
+      exception-service:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: finrecon-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      FINRECON_RECON_API_URL: http://reconciliation-service:8082
+      FINRECON_CASE_API_URL: http://exception-service:8083
+      FINRECON_AI_API_URL: http://ai-service:8000
+      FINRECON_GATEWAY_API_URL: http://gateway-service:8080
+      FINRECON_INGEST_API_URL: http://ingestion-service:8081
+      FINRECON_REPORTING_API_URL: http://reporting-service:8084
+    depends_on:
+      - reconciliation-service
+      - exception-service
+      - ai-service
 
 volumes:
   pgdata:

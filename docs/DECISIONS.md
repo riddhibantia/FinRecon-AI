@@ -121,3 +121,23 @@ P11 decision log:
   hygiene scan) and defers identity/RBAC to gateway deployment.
 - AI write-guard is a route-shape test, not a review checklist: any future
   PUT/DELETE/PATCH or extra POST on ai-service fails the build.
+
+P12 decision log:
+
+- Seven Dockerfiles (5 Java, ai-service, frontend); gateway/reporting
+  included despite skeleton status so every module builds uniformly.
+  Flyway services COPY db/migrations (filesystem location resolves at
+  WORKDIR). No local Docker daemon: images are reviewed here and built by
+  the CI docker job, never claimed working otherwise.
+- Compose runs the working system (infra + 3 Java services + ai +
+  frontend); gateway/reporting join when they serve traffic.
+- Structured logs via logback-spring.xml per real service with
+  %X{requestId}; no payloads by construction. Counters only (no timers
+  yet): ingest accepted/rejected, recon runs/results, cases
+  opened/transitions. Probes: liveness + readiness(db,diskSpace).
+- CI mirrors local gates 1:1 (gradle, uv/3.12 ai suite, repo pytest,
+  npm test+build) plus compose config and image builds.
+- P12 debugging note: test application.properties shadows main wholesale
+  (same classpath location), so probe flags repeat in test resources;
+  also fixed a self-matching hygiene regex and a duplicated properties
+  tail, both caught by tests before commit.

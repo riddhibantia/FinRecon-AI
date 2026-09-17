@@ -59,15 +59,18 @@ public class IngestionService {
     private final LedgerEntryRepository ledgerEntries;
     private final SettlementRepository settlements;
     private final Optional<IngestEventPublisher> publisher;
+    private final io.micrometer.core.instrument.MeterRegistry meters;
 
     public IngestionService(PaymentRepository payments,
                             LedgerEntryRepository ledgerEntries,
                             SettlementRepository settlements,
-                            Optional<IngestEventPublisher> publisher) {
+                            Optional<IngestEventPublisher> publisher,
+                            io.micrometer.core.instrument.MeterRegistry meters) {
         this.payments = payments;
         this.ledgerEntries = ledgerEntries;
         this.settlements = settlements;
         this.publisher = publisher;
+        this.meters = meters;
     }
 
     // ---- CSV entry points (header row required) ----
@@ -180,6 +183,11 @@ public class IngestionService {
         }
         BatchResult result = BatchResult.of(sourceType, java.util.UUID.randomUUID(),
                 accepted, duplicates, rejected, errors);
+        // P12 basic metrics: outcome counts per source type.
+        meters.counter("finrecon.ingest.accepted", "sourceType", sourceType)
+                .increment(accepted);
+        meters.counter("finrecon.ingest.rejected", "sourceType", sourceType)
+                .increment(rejected);
         publishAccepted(sourceType, result.requestId(), acceptedRows);
         return result;
     }

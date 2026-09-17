@@ -48,6 +48,7 @@ public class CaseService {
     private final ExceptionEvidenceRepository evidence;
     private final ResolutionActionRepository actions;
     private final AuditLogRepository audits;
+    private final io.micrometer.core.instrument.MeterRegistry meters;
 
     public CaseService(ReconciliationRunRepository runs,
                        ReconciliationResultRepository results,
@@ -57,7 +58,8 @@ public class CaseService {
                        ReconExceptionRepository exceptions,
                        ExceptionEvidenceRepository evidence,
                        ResolutionActionRepository actions,
-                       AuditLogRepository audits) {
+                       AuditLogRepository audits,
+                       io.micrometer.core.instrument.MeterRegistry meters) {
         this.runs = runs;
         this.results = results;
         this.payments = payments;
@@ -67,6 +69,7 @@ public class CaseService {
         this.evidence = evidence;
         this.actions = actions;
         this.audits = audits;
+        this.meters = meters;
     }
 
     public record SyncResult(UUID runId, int opened, int skipped) {
@@ -138,6 +141,9 @@ public class CaseService {
                 settlements.findByPaymentPaymentId(payment.getPaymentId());
         ReconException exception = exceptions.save(new ReconException(result,
                 result.getMismatchType(), severityFor(result.getAmountDifference())));
+        // P12 basic metrics: opened cases by category.
+        meters.counter("finrecon.cases.opened", "category",
+                result.getMismatchType()).increment();
         LocalDate deadline = payment.getEventTime().toLocalDate().plusDays(SETTLEMENT_WINDOW_DAYS);
         for (EvidenceBuilder.EvidenceSpec spec : EvidenceBuilder.build(
                 result.getMismatchType(), payment, ledgerRows, settlementRows,
@@ -221,6 +227,7 @@ public class CaseService {
         exception.assign(analystId.trim());
         actions.save(new ResolutionAction(exception, "ASSIGN", "ANALYST",
                 actor(actorId, analystId), "Assigned to " + analystId.trim()));
+        transitioned("ASSIGN");
         audit(exception, "CASE_ASSIGNED", actor(actorId, analystId));
         return summaryOf(exception);
     }
@@ -234,6 +241,7 @@ public class CaseService {
         actions.save(new ResolutionAction(exception, actionType.trim(),
                 actorType == null ? "ANALYST" : actorType.trim(),
                 actor(actorId, exception.getAssignedTo()), notes));
+        transitioned("RESOLVE");
         audit(exception, "CASE_RESOLVED", actor(actorId, exception.getAssignedTo()));
         return summaryOf(exception);
     }
@@ -246,6 +254,7 @@ public class CaseService {
         actions.save(new ResolutionAction(exception, "ESCALATE",
                 actorType == null ? "ANALYST" : actorType.trim(),
                 actor(actorId, exception.getAssignedTo()), notes));
+        transitioned("ESCALATE");
         audit(exception, "CASE_ESCALATED", actor(actorId, exception.getAssignedTo()));
         return summaryOf(exception);
     }
@@ -266,6 +275,11 @@ public class CaseService {
     private void audit(ReconException exception, String action, String actorId) {
         audits.save(new AuditLog("ANALYST", actorId, action,
                 "exception", exception.getExceptionId().toString(), "{}"));
+    }
+
+    // P12 basic metrics: lifecycle transitions by action.
+    private void transitioned(String action) {
+        meters.counter("finrecon.cases.transitions", "action", action).increment();
     }
 
     private static String actor(String actorId, String fallback) {

@@ -201,6 +201,19 @@ npm run dev   # http://localhost:3000
 - `python -m pytest tests -q` (repo root) scans tracked files for
   secrets and card-like data.
 
+## P12 operations (see docs/OPERATIONS.md for the runbook)
+
+- CI (`.github/workflows/ci.yml`): Gradle build, full ai-service suite,
+  repo Python checks, frontend test+build, compose validation, and Docker
+  builds of all seven images. Merge only when green.
+- Logs carry `[requestId]` on every request; counters
+  (`finrecon.ingest.*`, `finrecon.recon.*`, `finrecon.cases.*`) expose
+  outcomes per category.
+- Liveness/readiness probes at `/actuator/health/liveness|readiness`;
+  gate orchestrator traffic on readiness.
+- `docker compose up --build` runs infra plus the working services where
+  Docker exists. Images are built by CI, not claimed working otherwise.
+
 ## Project structure
 
 ```text

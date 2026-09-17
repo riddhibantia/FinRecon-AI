@@ -28,17 +28,20 @@ public class ReconciliationService {
     private final SettlementRepository settlements;
     private final ReconciliationRunRepository runs;
     private final ReconciliationResultRepository results;
+    private final io.micrometer.core.instrument.MeterRegistry meters;
 
     public ReconciliationService(PaymentRepository payments,
                                  LedgerEntryRepository ledgerEntries,
                                  SettlementRepository settlements,
                                  ReconciliationRunRepository runs,
-                                 ReconciliationResultRepository results) {
+                                 ReconciliationResultRepository results,
+                                 io.micrometer.core.instrument.MeterRegistry meters) {
         this.payments = payments;
         this.ledgerEntries = ledgerEntries;
         this.settlements = settlements;
         this.runs = runs;
         this.results = results;
+        this.meters = meters;
     }
 
     public record RunSummary(UUID runId, String status, String ruleVersion,
@@ -67,16 +70,22 @@ public class ReconciliationService {
                 results.save(new ReconciliationResult(run, payment,
                         outcome.matchStatus(), outcome.mismatchType(),
                         outcome.amountDifference()));
+                // P12 basic metrics: result counts by outcome.
+                meters.counter("finrecon.recon.results", "matchStatus",
+                        outcome.matchStatus()).increment();
                 if ("MATCHED".equals(outcome.matchStatus())) {
                     matched++;
                 }
             }
             run.complete();
+            // P12 basic metrics: run counts by terminal status.
+            meters.counter("finrecon.recon.runs", "status", run.getStatus()).increment();
             long total = candidates.size();
             return new RunSummary(run.getRunId(), run.getStatus(),
                     run.getRuleVersion(), total, matched, total - matched);
         } catch (RuntimeException e) {
             run.fail();
+            meters.counter("finrecon.recon.runs", "status", run.getStatus()).increment();
             throw e;
         }
     }
