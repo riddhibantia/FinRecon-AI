@@ -168,6 +168,27 @@ carries `X-Request-Id`. Repeats are idempotent (payments via
   machines without Docker; broker-free tests cover envelope, dedupe,
   replay, and bean conditionality.
 
+## P10 dashboard (frontend :3000, needs backends for data)
+
+```powershell
+cd frontend
+npm install
+npm test      # tsc + 14 contract tests
+npm run build # production build
+npm run dev   # http://localhost:3000
+```
+
+- Origins come from `FINRECON_*_API_URL` (server-side only, see
+  `.env.template`); the browser calls same-origin `/api/*` proxies.
+- Pages: `/` service status, `/runs` start-a-run + `/runs/[runId]` results,
+  `/cases` filterable queue, `/cases/[id]` evidence, sources, cited AI
+  investigation, lifecycle actions, audit trail.
+- The UI repeats backend facts verbatim and computes no financial truth.
+  Unreachable backends render honest error panels (verified live against
+  stopped backends); the AI panel reports 503/unreachable without guessing.
+- AI access is read-only (`POST /investigate` via proxy); the dashboard
+  cannot train models or mutate cases through the AI service.
+
 ## Project structure
 
 ```text

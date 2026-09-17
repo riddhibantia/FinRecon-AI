@@ -93,3 +93,18 @@ P5 decision log:
   bounded in-memory map, never in Postgres.
 - Compose adds single-node Kafka (KRaft) + Redis for local runs; managed
   equivalents stay a cloud-later concern. No Kubernetes/AWS in P5.
+
+P10 decision log:
+
+- No new dependencies: native fetch, App Router server components, plain
+  CSS. No UI library (not needed for this workflow).
+- Same-origin /api/* proxies with an explicit per-route target map (no
+  generic forwarder); the closed CASE_ACTIONS set is unit-tested so the UI
+  cannot invent P4 transitions.
+- Server components fetch backends directly; only forms/islands are client
+  components. Correlation IDs pass through the proxy (generated if absent).
+- AI panel uses POST /investigate only. /classify is deliberately not
+  exposed: the UI cannot build validated P6 snapshots from case display
+  data, and fabricating them is forbidden.
+- Unreachable backends render labeled error states; the 502 proxy path and
+  the stopped-backend pages were verified against a live dev server.

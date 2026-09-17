@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "test-dist",
+    "rootDir": ".",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "jsx": "react-jsx",
+    "incremental": false,
+    "noUnusedLocals": false
+  },
+  "include": ["lib/format.ts", "lib/backend.ts"]
+}
