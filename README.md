@@ -189,6 +189,18 @@ npm run dev   # http://localhost:3000
 - AI access is read-only (`POST /investigate` via proxy); the dashboard
   cannot train models or mutate cases through the AI service.
 
+## P11 boundaries (all services)
+
+- Every Java response carries `X-Request-Id` (generated when absent);
+  the dashboard proxy forwards it end to end.
+- Browsers may call `/api/**` from `FRONTEND_ORIGIN`
+  (default `http://localhost:3000`) with GET/POST only.
+- ai-service exposes read-only advisory routes only (`/health`,
+  `/classify`, `/investigate`); every investigation requires human
+  approval. See `docs/SECURITY.md`.
+- `python -m pytest tests -q` (repo root) scans tracked files for
+  secrets and card-like data.
+
 ## Project structure
 
 ```text

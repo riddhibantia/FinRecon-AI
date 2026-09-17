@@ -108,3 +108,16 @@ P10 decision log:
   data, and fabricating them is forbidden.
 - Unreachable backends render labeled error states; the 502 proxy path and
   the stopped-backend pages were verified against a live dev server.
+
+P11 decision log:
+
+- CorrelationFilter (OncePerRequestFilter + MDC) on the three real
+  services; gateway/reporting skeletons excluded until they serve traffic.
+- CORS allowlist is one dashboard origin with GET/POST on /api/** only;
+  proven by live preflight tests, not registry unit tests (the registry
+  accessor is protected and the live test is stronger anyway).
+- No auth system invented: master names roles but specifies no mechanism,
+  so P11 pins boundaries (CORS, proxy allowlist, read-only AI surface,
+  hygiene scan) and defers identity/RBAC to gateway deployment.
+- AI write-guard is a route-shape test, not a review checklist: any future
+  PUT/DELETE/PATCH or extra POST on ai-service fails the build.
