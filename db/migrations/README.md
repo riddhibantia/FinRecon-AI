@@ -1,3 +1,5 @@
-# db/migrations - P0 placeholder
+# db/migrations - P1 canonical DDL
 
-No migrations in P0. Canonical tables, constraints, and indexes arrive in P1 per FINRECON_MASTER.md #11.
+V1 core sources, V2 reconciliation, V3 exceptions, V4 knowledge/AI/audit.
+Applied by Flyway (`spring.flyway.locations=filesystem:db/migrations`).
+Details in `docs/DATABASE.md`.
