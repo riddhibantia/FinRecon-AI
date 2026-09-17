@@ -23,12 +23,23 @@ import com.finrecon.ingestion.domain.Payment;
 import com.finrecon.ingestion.domain.PaymentRepository;
 import com.finrecon.ingestion.domain.Settlement;
 import com.finrecon.ingestion.domain.SettlementRepository;
+import com.finrecon.ingestion.messaging.IngestEventPublisher;
 
 // P2 ingestion: CSV/JSON rows -> validated canonical P1 entities.
 // Deterministic: invalid rows are rejected with per-row errors, never
 // silently fixed. Idempotent: repeats skip via existing P1 constraints
 // (payments) or exact-duplicate match (ledger/settlement). No matching,
 // no reconciliation, no exception logic here.
+// P5: accepted rows are also published as ingest events when a publisher
+// bean exists; publishing is best-effort and never fails the sync path.
+
+// P2 ingestion: CSV/JSON rows -> validated canonical P1 entities.
+// Deterministic: invalid rows are rejected with per-row errors, never
+// silently fixed. Idempotent: repeats skip via existing P1 constraints
+// (payments) or exact-duplicate match (ledger/settlement). No matching,
+// no reconciliation, no exception logic here.
+// P5: accepted rows are also published as ingest events when a publisher
+// bean exists; publishing is best-effort and never fails the sync path.
 @Service
 public class IngestionService {
 
@@ -47,13 +58,16 @@ public class IngestionService {
     private final PaymentRepository payments;
     private final LedgerEntryRepository ledgerEntries;
     private final SettlementRepository settlements;
+    private final Optional<IngestEventPublisher> publisher;
 
     public IngestionService(PaymentRepository payments,
                             LedgerEntryRepository ledgerEntries,
-                            SettlementRepository settlements) {
+                            SettlementRepository settlements,
+                            Optional<IngestEventPublisher> publisher) {
         this.payments = payments;
         this.ledgerEntries = ledgerEntries;
         this.settlements = settlements;
+        this.publisher = publisher;
     }
 
     // ---- CSV entry points (header row required) ----
@@ -152,17 +166,46 @@ public class IngestionService {
                                      List<RowError> errors, int rejected, RowStore<T> store) {
         int accepted = 0;
         int duplicates = 0;
+        List<T> acceptedRows = new ArrayList<>();
         for (NumberedRow<T> numbered : rows) {
             StoreOutcome outcome = store.store(numbered.request(), numbered.row(), errors);
             if (outcome == StoreOutcome.ACCEPTED) {
                 accepted++;
+                acceptedRows.add(numbered.request());
             } else if (outcome == StoreOutcome.DUPLICATE) {
                 duplicates++;
             } else {
                 rejected++;
             }
         }
-        return BatchResult.of(sourceType, accepted, duplicates, rejected, errors);
+        BatchResult result = BatchResult.of(sourceType, java.util.UUID.randomUUID(),
+                accepted, duplicates, rejected, errors);
+        publishAccepted(sourceType, result.requestId(), acceptedRows);
+        return result;
+    }
+
+    // P5 async replica path: accepted rows go to Kafka keyed by their
+    // transaction reference. Absent publisher (default) or broker failure
+    // leaves the synchronous result untouched.
+    private <T> void publishAccepted(String sourceType, java.util.UUID requestId,
+                                     List<T> acceptedRows) {
+        if (publisher.isEmpty() || acceptedRows.isEmpty()) {
+            return;
+        }
+        IngestEventPublisher outbox = publisher.get();
+        for (T row : acceptedRows) {
+            outbox.publish(sourceType, requestId, rowKey(sourceType, row), row);
+        }
+    }
+
+    private static String rowKey(String sourceType, Object row) {
+        String key = switch (sourceType) {
+            case "PAYMENT_GATEWAY" -> ((PaymentIngestRequest) row).externalTxnId();
+            case "INTERNAL_LEDGER" -> ((LedgerIngestRequest) row).externalTxnId();
+            case "SETTLEMENT_SYSTEM" -> ((SettlementIngestRequest) row).externalTxnId();
+            default -> null;
+        };
+        return key == null || key.isBlank() ? "unknown" : key.trim();
     }
 
     // ---- row mapping (structure) ----

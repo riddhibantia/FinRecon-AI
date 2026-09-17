@@ -155,6 +155,19 @@ carries `X-Request-Id`. Repeats are idempotent (payments via
 - `POST /api/cases/{id}/assign`, `/resolve`, `/escalate` — lifecycle
   transitions; illegal moves are 422 with `ILLEGAL_TRANSITION`.
 
+## P5 async path (same service, needs Kafka/Redis only when enabled)
+
+- Sync ingest also publishes one event per accepted row to
+  `finrecon.ingest.v1` (best-effort; sync results stand without a broker).
+- The consumer dedupes by `eventId` and replays through the idempotent
+  store path; 3x backoff retry then DLT; validation failures ack, no retry.
+- Enable where brokers exist: `finrecon.messaging.enabled=true` with
+  `KAFKA_BOOTSTRAP_SERVERS`, and `finrecon.redis.enabled=true` for Redis
+  dedupe (in-memory otherwise). `docker compose up kafka redis` locally.
+- Contracts: `docs/EVENTS.md`. Live broker validation is out of scope on
+  machines without Docker; broker-free tests cover envelope, dedupe,
+  replay, and bean conditionality.
+
 ## Project structure
 
 ```text

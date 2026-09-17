@@ -18,10 +18,10 @@ public record BatchResult(
         List<RowError> errors,
         OffsetDateTime processedAt) {
 
-    public static BatchResult of(String sourceType, int accepted, int duplicates,
-                                 int rejected, List<RowError> errors) {
+    public static BatchResult of(String sourceType, UUID requestId, int accepted,
+                                 int duplicates, int rejected, List<RowError> errors) {
         String status = rejected == 0 ? "COMPLETED" : "COMPLETED_WITH_REJECTIONS";
-        return new BatchResult(UUID.randomUUID(), sourceType, status,
+        return new BatchResult(requestId, sourceType, status,
                 accepted, duplicates, rejected, List.copyOf(errors), OffsetDateTime.now());
     }
 }

@@ -76,3 +76,20 @@ P4 decision log:
   library) so Postgres jsonb and H2 JSON both accept it.
 - Sync is idempotent: results that already have cases are skipped and
   counted; only MISMATCHED results open cases.
+
+P5 decision log:
+
+- One canonical topic (`finrecon.ingest.v1`, keyed by external_txn_id);
+  the consumer replays through the unchanged P2 store path, so async
+  reproduces sync with no duplicate effects (eventId dedupe + store
+  idempotency, two independent guards).
+- All messaging beans are conditional and OFF by default: no broker, no
+  connection attempts, earlier phases boot untouched. Enable with
+  `finrecon.messaging.enabled` / `finrecon.redis.enabled`.
+- Publishing is best-effort (logged, never thrown): a broker outage must
+  not fail synchronous ingestion.
+- Validation rejections ack without retry; unexpected failures retry 3x
+  with backoff then DLT. No new tables: dedupe lives in Redis (TTL) or a
+  bounded in-memory map, never in Postgres.
+- Compose adds single-node Kafka (KRaft) + Redis for local runs; managed
+  equivalents stay a cloud-later concern. No Kubernetes/AWS in P5.

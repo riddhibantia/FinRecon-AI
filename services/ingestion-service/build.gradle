@@ -13,6 +13,10 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     // P2: RFC-4180 CSV parsing for gateway/ledger/settlement files.
     implementation 'org.apache.commons:commons-csv:1.10.0'
+    // P5: Kafka producer/consumer structure + Redis dedupe helper.
+    // Both stay inert unless explicitly enabled (see application.properties).
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     // H2 serves @SpringBootTest only (Flyway off, create-drop). It never
