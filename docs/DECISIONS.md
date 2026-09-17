@@ -36,3 +36,26 @@ P1 decision log:
 - CHECKs only where the master fixes values (taxonomy, case lifecycle,
   run status, currency shape, non-negative money). Source statuses stay
   open TEXT; P3/P4 may constrain them.
+
+P3 decision log:
+
+- `match_status` is MATCHED/MISMATCHED and `mismatch_type` reuses the
+  master taxonomy vocabulary so P4 can map results to cases 1:1.
+- Fixed first-failure check order (duplicate, missing, amount, unknown,
+  fee, net/partial, FX, status, late). Same input always yields the same
+  outcome; reruns write a new run row with identical result content.
+- `RULE_VERSION = 1.0.0` is recorded on every run for traceability.
+- P3-defined parameters (no store exists in P1): settlement window of
+  2 days for LATE_SETTLEMENT; 24h window inside the constrained fallback
+  matcher (merchant + amount + currency + time, never fuzzy).
+- Fee check compares observed ledger fee vs observed settlement fee; the
+  rule-based expected-fee check waits for fee schedules (P7+).
+- Status check is normalized equality across the three systems; a shared
+  lifecycle mapping is deferred. Multiple ledger rows for one payment map
+  to UNKNOWN_EXCEPTION (ambiguous books, needs a human).
+- Fallback matcher is specified, constrained, and unit-tested; the live
+  pipeline resolves exactly via FK linkage, so fallback is a documented
+  extension point for reference-less feeds, not on the hot path.
+- Reconciliation duplicates the three source-table mappings as read-only
+  views; ingestion remains the sole writer (bounded-context views, no
+  shared module, no P0 boundary change).

@@ -134,6 +134,17 @@ references are rejected. Every response is a `BatchResult`
 carries `X-Request-Id`. Repeats are idempotent (payments via
 `UNIQUE(external_txn_id)`; ledger/settlement via exact-duplicate match).
 
+## P3 reconciliation (reconciliation-service :8082, needs PostgreSQL at runtime)
+
+- `POST /api/reconcile?sourceSet=NAME` — runs the deterministic engine
+  (rule version `1.0.0`) over all known payments; returns run summary
+  (`runId,status,ruleVersion,total,matched,mismatched`).
+- `GET /api/reconcile/runs/{runId}` and `.../results` — read a run and its
+  per-payment results (`MATCHED` or `MISMATCHED` + taxonomy `mismatch_type`
+  + `amountDifference`). Unknown runs are 404.
+- Checks in fixed order: duplicate, missing, amount, unknown, fee, net,
+  FX, status, late settlement. No LLM/ML decides numeric truth.
+
 ## Project structure
 
 ```text
