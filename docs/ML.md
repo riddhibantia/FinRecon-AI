@@ -47,4 +47,16 @@ Full machine-readable report: `ai-service/evaluation/p6_metrics.json`.
 
 All nine heldout classes had precision/recall 1.0 on these deliberately simple synthetic cases. The confusion matrix is diagonal, with class support in the report's order: 90, 60, 60, 60, 30, 60, 30, 30, 30. Perfect scores on this generator are not evidence of real-world accuracy; both partitions share mutation templates. Independent labeled operational cases and out-of-template evaluation are needed before deployment claims.
 
+## P9 decision: deferred
+
+P9 (fine-tuning) is deferred on measured evidence, per the handoff conditions:
+
+1. **Dataset**: 3,000 labeled rows / 200 synthetic payment families exist, but all labels come from one deterministic generator (16 mutation templates of P3 checks). Fine-tuning a specialized model against labels this engine already produces adds no information.
+2. **Measured baseline**: heldout macro F1 = 1.0, per-class precision and recall = 1.0 on all nine classes. The simple transparent baseline has no measured failure mode for a specialized model to fix.
+3. **Quantitative improvement**: impossible to demonstrate — with a saturated 1.0 baseline there is no headroom, and any "improvement" would be fitting the shared template noise, not generalization.
+4. **Evaluation set**: no independent, out-of-template evaluation set exists; a comparison would be measured on the same synthetic distribution as training.
+5. **Justified scope**: no PyTorch/PEFT dependency, GPU cost, or experiment complexity is justified by any expected measurable gain.
+
+Revisit P9 only when independent analyst-labeled cases exist (from the P4 feedback path) and the baseline shows measured room for improvement on them.
+
 Tests cover numeric validation, missing sources, order invariance, target exclusion, grouped split rejection, actual engine-generated training, artifact persistence, repeatable probabilities, known heldout cases, unknown statuses, API errors, and incompatible artifact rejection. No live PostgreSQL or Kafka validation is claimed.
