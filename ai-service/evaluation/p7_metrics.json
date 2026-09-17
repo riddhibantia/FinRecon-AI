@@ -1,0 +1,407 @@
+{
+  "evaluation": "P7 fixed synthetic retrieval set; not an independent operational benchmark",
+  "backend": "memory",
+  "live_postgres_validated": false,
+  "evaluation_date": "2026-06-01",
+  "k": 3,
+  "min_score": 0.16,
+  "metric": "cosine similarity; relevant requires expected document AND literal expected passage",
+  "recall_at_k": 1.0,
+  "mrr_at_k": 1.0,
+  "question_count": 12,
+  "document_count": 8,
+  "chunk_count": 24,
+  "embedding_version": "finrecon-signed-hash-1536-v1",
+  "chunker_version": "markdown-whitespace-v1",
+  "chunk_size": 180,
+  "overlap": 30,
+  "questions_sha256": "f21a35b29c36c7a48091d7da6659fbb70a49f4b8dad1a09d4c3691a41a41fb9f",
+  "sources": {
+    "FIN-DATA-001": "b8240720c9589d4cfd7129b20951aa4fce493f2d79e25c69a02ce987de46d846",
+    "FIN-ESC-001": "62fe6f65ef24b9fc160542ac2709914e1dc163a9f7150d8a5ceea86615ec3cd8",
+    "FIN-EXC-001": "cf818ecbbe2390aadced4bc1c3e3eb348ca71f8ff42075435f6c1558b0948d87",
+    "FIN-FEE-001": "97ecb2ed65a8bf1eeeaae49805410f3251e4749a49222e0946ea12674cd33d9d",
+    "FIN-FX-001": "1d7430edc980ab26b5415b19cf54a58090bd97b606074fc91175403a3f5ef420",
+    "FIN-MER-001": "7a9237f85f9eaf78dd8fda5c387773d42d53579dd19b3f7f86054325b7369d13",
+    "FIN-SOP-001": "fcca36526286b4f260e34cf48460394caf619ce2f01ced9c074a46078626ef35",
+    "FIN-SET-001": "a6f1fbdd052f99b9367b9f1a9080902bd81aa13c171d346e244fa1aee2d51bdb"
+  },
+  "code_sha256": {
+    "__init__.py": "47aba4218353fc698514a70035f751f733939fe408193398612a11067da39ecc",
+    "__main__.py": "073b17df6e865ea585ecbd38b90f41275f1a20f4652f292ac2c2225e67a39dd5",
+    "documents.py": "6d53c1f423fe2fe61a1dae0a5472bbd1c8b612763e3e1c882c516d0e5288211c",
+    "embeddings.py": "49367f8c8a1bb8f8014c99e4508f2e043043bc1fb70b1bb37f0f01f97678f95b",
+    "evaluate.py": "508f1374d0ea57bf0bcd46625987123518e15fa5b46479a0f3ecdf7f0e36a9df",
+    "retrieval.py": "60117e0d6524e614973675844d8d53932d7e97d35b65ae384a2564ffe516fbb6",
+    "store.py": "55cb6dbd9b27a6758b23cfc10c86a744f40060b1b8eda53aac2981d5cf68cb19"
+  },
+  "libraries": {
+    "langchain-core": "0.3.83",
+    "numpy": "2.2.6"
+  },
+  "citations_verified": true,
+  "irrelevant_queries_returned_no_evidence": true,
+  "irrelevant_queries": [
+    {
+      "query": "How do astronomers measure quasar redshift?",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "returned_chunks": 0
+    },
+    {
+      "query": "What ingredients belong in sourdough bread?",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "returned_chunks": 0
+    },
+    {
+      "query": "the and of",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "returned_chunks": 0
+    }
+  ],
+  "questions": [
+    {
+      "id": "matching",
+      "query": "What controls apply to fallback matching?",
+      "document_id": "FIN-SOP-001",
+      "passage": "Exactly one candidate must qualify.",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-SOP-001",
+          "section": "Matching controls",
+          "chunk_id": "108dd4c6-aa3a-5466-a39c-135c9ca773d2",
+          "score": 0.1805787796286538,
+          "excerpt": "This is a synthetic training policy, not a merchant instruction. Match payment, ledger and settlement using the exact external transaction reference first. If no exact reference exists, controlled fallback requires the same merchant, amount and currency within a 24-hour time window. Exactly one candidate must qualify. Multiple candidates require manual review; never merge ambiguous payments using fuzzy similarity."
+        }
+      ]
+    },
+    {
+      "id": "late",
+      "query": "What is the calendar day settlement window?",
+      "document_id": "FIN-SET-001",
+      "passage": "two-calendar-day settlement window",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Settlement window",
+          "chunk_id": "9b73fc12-5974-5548-b865-acc762840c6f",
+          "score": 0.5765566601970551,
+          "excerpt": "This synthetic policy uses a two-calendar-day settlement window from the payment event date. A settlement dated after event date plus two days is late. The current P3 engine uses calendar days, not banking days, and does not adjust for weekends or public holidays. Analysts must not claim a business-day calendar is implemented."
+        },
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Missing settlement",
+          "chunk_id": "3e2210f7-d917-5137-882c-124b1d7d21aa",
+          "score": 0.3913118960624632,
+          "excerpt": "For a missing settlement, confirm the payment reference and check the settlement batch delivery record before contacting payment operations. The P3 engine flags an absent settlement immediately; it does not wait for the two-day window to expire. Before the deadline, describe the finding as pending delivery rather than a proven SLA breach. Preserve the gateway and ledger records and the last observed batch timestamp."
+        },
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Batch delivery evidence",
+          "chunk_id": "2cd5db0d-90ae-51cb-ab59-abe912b53d89",
+          "score": 0.23904572186687872,
+          "excerpt": "A settlement batch acknowledgement confirms file receipt, not final funds availability. Compare the expected batch identifier with the received file manifest and source settlement rows. If the batch is incomplete, request the missing file from payment operations. Never manufacture a settlement row to clear an exception."
+        }
+      ]
+    },
+    {
+      "id": "missing",
+      "query": "How should a missing settlement be investigated before the deadline?",
+      "document_id": "FIN-SET-001",
+      "passage": "pending delivery rather than a proven SLA breach",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Missing settlement",
+          "chunk_id": "3e2210f7-d917-5137-882c-124b1d7d21aa",
+          "score": 0.5,
+          "excerpt": "For a missing settlement, confirm the payment reference and check the settlement batch delivery record before contacting payment operations. The P3 engine flags an absent settlement immediately; it does not wait for the two-day window to expire. Before the deadline, describe the finding as pending delivery rather than a proven SLA breach. Preserve the gateway and ledger records and the last observed batch timestamp."
+        },
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Batch delivery evidence",
+          "chunk_id": "2cd5db0d-90ae-51cb-ab59-abe912b53d89",
+          "score": 0.2672612419124244,
+          "excerpt": "A settlement batch acknowledgement confirms file receipt, not final funds availability. Compare the expected batch identifier with the received file manifest and source settlement rows. If the batch is incomplete, request the missing file from payment operations. Never manufacture a settlement row to clear an exception."
+        },
+        {
+          "document_id": "FIN-SOP-001",
+          "section": "P3 rule order",
+          "chunk_id": "7d28bb9e-eec5-50ee-b5e8-5b13854c9735",
+          "score": 0.25993762245501817,
+          "excerpt": "The current engine reports the first failing condition: duplicate settlement, missing settlement, gross amount mismatch, ambiguous ledger entries, fee variance, partial or excess settlement, currency disagreement, status disagreement, then late settlement. A matched outcome means no listed condition failed, not proof of bank movement. Investigators must retain combined faults as evidence even when the engine emits one category."
+        }
+      ]
+    },
+    {
+      "id": "fee",
+      "query": "What is the standard domestic processing fee?",
+      "document_id": "FIN-FEE-001",
+      "passage": "2.50 percent of gross amount",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-FEE-001",
+          "section": "Standard domestic processing fee",
+          "chunk_id": "0198bb2f-59f4-58da-b064-2ae333d71b88",
+          "score": 0.552344770738994,
+          "excerpt": "For the synthetic DEMO-STANDARD merchant tier, the domestic processing fee is 2.50 percent of gross amount, with no fixed charge. Round the calculated fee to two decimal places using half-up rounding. A gross amount of INR 10000.00 therefore has a fee of INR 250.00 and a net amount of INR 9750.00. These demonstration rates are not an implemented fee-rule store or a real commercial offer."
+        },
+        {
+          "document_id": "FIN-FEE-001",
+          "section": "Refund processing fees",
+          "chunk_id": "3acab7c3-f16d-52fe-8817-2546b147593c",
+          "score": 0.45184805705753195,
+          "excerpt": "For the synthetic standard tier, the original processing fee is not automatically returned on a refund. A refund fee credit requires an explicit approved adjustment linked to the original payment. Do not net an unsupported fee credit against a settlement discrepancy."
+        },
+        {
+          "document_id": "FIN-FEE-001",
+          "section": "Fee variance investigation",
+          "chunk_id": "2b5aad8c-4ece-533e-9be2-d8ed725679e2",
+          "score": 0.34655164004183603,
+          "excerpt": "Investigate a fee variance by comparing the ledger fee with the settlement fee and retaining both observed values. Check the merchant agreement version and effective date before using a schedule. The current P3 engine compares observed fees only; it does not compute the contracted fee from this document. A retrieved schedule must not be presented as a database-backed fee rule."
+        }
+      ]
+    },
+    {
+      "id": "refund",
+      "query": "Are original processing fees returned on a refund?",
+      "document_id": "FIN-FEE-001",
+      "passage": "not automatically returned on a refund",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-FEE-001",
+          "section": "Refund processing fees",
+          "chunk_id": "3acab7c3-f16d-52fe-8817-2546b147593c",
+          "score": 0.5196152422706631,
+          "excerpt": "For the synthetic standard tier, the original processing fee is not automatically returned on a refund. A refund fee credit requires an explicit approved adjustment linked to the original payment. Do not net an unsupported fee credit against a settlement discrepancy."
+        }
+      ]
+    },
+    {
+      "id": "fx",
+      "query": "What foreign exchange reference evidence must treasury provide?",
+      "document_id": "FIN-FX-001",
+      "passage": "currency pair, quoted exchange rate, rate timestamp and provider reference",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-FX-001",
+          "section": "FX reference evidence",
+          "chunk_id": "4716b6e0-af89-5095-9a69-2b50d8fc9166",
+          "score": 0.4707565417620041,
+          "excerpt": "For a foreign exchange discrepancy, obtain the currency pair, quoted exchange rate, rate timestamp and provider reference from treasury. Preserve original currency amounts and conversion direction. Never infer an exchange rate from a retrieved paragraph or use a current market quote for an older payment. This synthetic policy supplies no live FX rates."
+        },
+        {
+          "document_id": "FIN-FX-001",
+          "section": "FX rounding review",
+          "chunk_id": "ea193fa3-07f6-55c9-ab02-98823c9bcc3e",
+          "score": 0.3541688016605732,
+          "excerpt": "The agreed conversion basis belongs to the effective merchant agreement. Treasury must approve the reference source and rounding basis before an analyst proposes an FX adjustment. Retain the approval and calculated decimal values separately from any AI explanation."
+        },
+        {
+          "document_id": "FIN-FX-001",
+          "section": "Currency disagreement",
+          "chunk_id": "f36fb94f-ae6a-5615-9ce5-4a01be510a08",
+          "score": 0.30578831486257535,
+          "excerpt": "The current P3 FX_VARIANCE condition means that payment, ledger or settlement currencies disagree. P3 does not calculate rate deltas, cross-currency net amounts or FX tolerances. If a historical reference rate is unavailable, return insufficient evidence and request treasury review instead of inventing a conversion amount."
+        }
+      ]
+    },
+    {
+      "id": "contract",
+      "query": "Which merchant agreement version and effective date should be selected?",
+      "document_id": "FIN-MER-001",
+      "passage": "effective on the payment event date",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-MER-001",
+          "section": "Version and effective date",
+          "chunk_id": "cad7e78c-e5bc-5067-9b77-b1a47a6bbf18",
+          "score": 0.5855400437691199,
+          "excerpt": "Select the merchant agreement effective on the payment event date, not merely the newest document. If two effective agreements conflict, stop the recommendation and request contract-owner review. An expired agreement is historical evidence only; it must not govern a new payment. Retain the document ID, version and effective dates in the case citation."
+        },
+        {
+          "document_id": "FIN-MER-001",
+          "section": "Agreement applicability",
+          "chunk_id": "3cee679a-b2a1-5ab1-a83c-9437a6a3ceae",
+          "score": 0.49487165930539356,
+          "excerpt": "This synthetic agreement applies only to merchant DEMO-MERCHANT-001 and tier DEMO-STANDARD. The demonstration settlement currency is INR. The agreement refers to Merchant Fee Schedule version 1.0 and Settlement Timing Policy version 1.0. Do not apply these terms to another merchant without an applicable signed agreement."
+        },
+        {
+          "document_id": "FIN-MER-001",
+          "section": "Adjustment authorization",
+          "chunk_id": "8ea58234-7431-5d2a-8e7d-903aff0eea35",
+          "score": 0.2614881801842454,
+          "excerpt": "Only an authorized human manager may approve a merchant settlement adjustment. An AI investigation produces a draft, never payment execution or case resolution. Attach source record evidence and the applicable agreement passage before asking for approval."
+        }
+      ]
+    },
+    {
+      "id": "duplicate",
+      "query": "What is the duplicate settlement investigation procedure?",
+      "document_id": "FIN-EXC-001",
+      "passage": "two transfers or only duplicate records",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-EXC-001",
+          "section": "Duplicate settlement investigation",
+          "chunk_id": "1c761d9a-c2b4-56cf-a78c-782a6a93fca1",
+          "score": 0.5965587590013044,
+          "excerpt": "For duplicate settlement records, compare the source settlement identifiers, batch identifiers and transaction reference. Preserve every row and check whether a file was replayed before concluding that money moved twice. Do not delete duplicate evidence or issue a refund automatically. Ask payment operations to confirm whether there were two transfers or only duplicate records. This is a synthetic training procedure."
+        },
+        {
+          "document_id": "FIN-SOP-001",
+          "section": "P3 rule order",
+          "chunk_id": "7d28bb9e-eec5-50ee-b5e8-5b13854c9735",
+          "score": 0.34874291623145787,
+          "excerpt": "The current engine reports the first failing condition: duplicate settlement, missing settlement, gross amount mismatch, ambiguous ledger entries, fee variance, partial or excess settlement, currency disagreement, status disagreement, then late settlement. A matched outcome means no listed condition failed, not proof of bank movement. Investigators must retain combined faults as evidence even when the engine emits one category."
+        },
+        {
+          "document_id": "FIN-EXC-001",
+          "section": "Partial settlement investigation",
+          "chunk_id": "930de872-3323-5978-8fc7-c628a507f3cd",
+          "score": 0.3227486121839514,
+          "excerpt": "For a partial settlement, compare total settled amount with the ledger net amount. Request the outstanding tranche reference and expected completion date. Do not mark the case resolved merely because one settlement row exists. Record the remaining amount using deterministic source calculations, not a language model."
+        }
+      ]
+    },
+    {
+      "id": "partial",
+      "query": "How do we investigate a partial settlement?",
+      "document_id": "FIN-EXC-001",
+      "passage": "outstanding tranche reference and expected completion date",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-EXC-001",
+          "section": "Partial settlement investigation",
+          "chunk_id": "930de872-3323-5978-8fc7-c628a507f3cd",
+          "score": 0.3227486121839514,
+          "excerpt": "For a partial settlement, compare total settled amount with the ledger net amount. Request the outstanding tranche reference and expected completion date. Do not mark the case resolved merely because one settlement row exists. Record the remaining amount using deterministic source calculations, not a language model."
+        },
+        {
+          "document_id": "FIN-SOP-001",
+          "section": "P3 rule order",
+          "chunk_id": "7d28bb9e-eec5-50ee-b5e8-5b13854c9735",
+          "score": 0.29061909685954823,
+          "excerpt": "The current engine reports the first failing condition: duplicate settlement, missing settlement, gross amount mismatch, ambiguous ledger entries, fee variance, partial or excess settlement, currency disagreement, status disagreement, then late settlement. A matched outcome means no listed condition failed, not proof of bank movement. Investigators must retain combined faults as evidence even when the engine emits one category."
+        },
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Missing settlement",
+          "chunk_id": "3e2210f7-d917-5137-882c-124b1d7d21aa",
+          "score": 0.2795084971874737,
+          "excerpt": "For a missing settlement, confirm the payment reference and check the settlement batch delivery record before contacting payment operations. The P3 engine flags an absent settlement immediately; it does not wait for the two-day window to expire. Before the deadline, describe the finding as pending delivery rather than a proven SLA breach. Preserve the gateway and ledger records and the last observed batch timestamp."
+        }
+      ]
+    },
+    {
+      "id": "escalation",
+      "query": "When does a high impact discrepancy require escalation to the operations manager?",
+      "document_id": "FIN-ESC-001",
+      "passage": "INR 100000.00 or more",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-ESC-001",
+          "section": "High impact escalation",
+          "chunk_id": "ad7e6a56-be1d-5ad3-affe-faacaec1d322",
+          "score": 0.5187513759338114,
+          "excerpt": "Under this synthetic escalation matrix, a discrepancy of INR 100000.00 or more, or evidence of repeated funds movement, requires the operations manager immediately. The analyst must attach source record identifiers and the unresolved difference. These are demonstration thresholds, not an automated severity rule in P3."
+        },
+        {
+          "document_id": "FIN-ESC-001",
+          "section": "Unresolved case ageing",
+          "chunk_id": "53bfb692-d843-539b-a36d-59b49a255202",
+          "score": 0.2672612419124244,
+          "excerpt": "An unresolved case older than two calendar days must be reviewed by the operations manager. Record the last investigation action, missing evidence and next owner. Escalation does not imply financial loss or authorize a write-off. An AI draft must remain subject to human review."
+        },
+        {
+          "document_id": "FIN-ESC-001",
+          "section": "Specialist ownership",
+          "chunk_id": "038e929d-aae5-5664-b37f-8f169eba64c6",
+          "score": 0.1690308509457033,
+          "excerpt": "Route missing batches, duplicate records and settlement delivery delays to payment operations. Route historical foreign exchange rate questions to treasury. Route disputed merchant terms to the contract owner. The reconciliation analyst retains case ownership until a human accepts the handoff."
+        }
+      ]
+    },
+    {
+      "id": "money",
+      "query": "What do gross_amount net_amount and settled_amount mean?",
+      "document_id": "FIN-DATA-001",
+      "passage": "net_amount is the ledger expected amount after fees",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-DATA-001",
+          "section": "Money fields",
+          "chunk_id": "912a1883-b651-5c01-81c2-1c547d69da7a",
+          "score": 0.7013578501792771,
+          "excerpt": "In this synthetic data dictionary, gross_amount is the ledger amount before fees. fee_amount is the observed processing fee. net_amount is the ledger expected amount after fees. settled_amount is the amount reported by the settlement source. Currency accompanies every amount. Store and compare decimal values; binary floating point must not establish financial truth."
+        },
+        {
+          "document_id": "FIN-EXC-001",
+          "section": "Partial settlement investigation",
+          "chunk_id": "930de872-3323-5978-8fc7-c628a507f3cd",
+          "score": 0.39386318072168813,
+          "excerpt": "For a partial settlement, compare total settled amount with the ledger net amount. Request the outstanding tranche reference and expected completion date. Do not mark the case resolved merely because one settlement row exists. Record the remaining amount using deterministic source calculations, not a language model."
+        },
+        {
+          "document_id": "FIN-FEE-001",
+          "section": "Standard domestic processing fee",
+          "chunk_id": "0198bb2f-59f4-58da-b064-2ae333d71b88",
+          "score": 0.3063857527128992,
+          "excerpt": "For the synthetic DEMO-STANDARD merchant tier, the domestic processing fee is 2.50 percent of gross amount, with no fixed charge. Round the calculated fee to two decimal places using half-up rounding. A gross amount of INR 10000.00 therefore has a fee of INR 250.00 and a net amount of INR 9750.00. These demonstration rates are not an implemented fee-rule store or a real commercial offer."
+        }
+      ]
+    },
+    {
+      "id": "timestamp",
+      "query": "Is settlement_date a timezone-aware transfer timestamp?",
+      "document_id": "FIN-DATA-001",
+      "passage": "calendar date, not a timezone-aware transfer instant",
+      "first_relevant_rank": 1,
+      "status": "EVIDENCE_FOUND",
+      "retrieved": [
+        {
+          "document_id": "FIN-DATA-001",
+          "section": "Evidence and timestamps",
+          "chunk_id": "52ae2d07-ca27-5e6f-a6e3-d40eba75d482",
+          "score": 0.46662826262869145,
+          "excerpt": "event_time is the gateway payment timestamp with timezone. posted_at is the ledger posting timestamp. settlement_date is a calendar date, not a timezone-aware transfer instant. expected_value and observed_value describe a particular rule comparison; amount_difference alone does not explain the complete exception. Store the rule version with reconciliation evidence."
+        },
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Missing settlement",
+          "chunk_id": "3e2210f7-d917-5137-882c-124b1d7d21aa",
+          "score": 0.2738612787525831,
+          "excerpt": "For a missing settlement, confirm the payment reference and check the settlement batch delivery record before contacting payment operations. The P3 engine flags an absent settlement immediately; it does not wait for the two-day window to expire. Before the deadline, describe the finding as pending delivery rather than a proven SLA breach. Preserve the gateway and ledger records and the last observed batch timestamp."
+        },
+        {
+          "document_id": "FIN-SET-001",
+          "section": "Settlement window",
+          "chunk_id": "9b73fc12-5974-5548-b865-acc762840c6f",
+          "score": 0.2567762955065478,
+          "excerpt": "This synthetic policy uses a two-calendar-day settlement window from the payment event date. A settlement dated after event date plus two days is late. The current P3 engine uses calendar days, not banking days, and does not adjust for weekends or public holidays. Analysts must not claim a business-day calendar is implemented."
+        }
+      ]
+    }
+  ]
+}

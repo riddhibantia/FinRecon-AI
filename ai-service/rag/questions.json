@@ -1,0 +1,14 @@
+[
+  {"id":"matching","query":"What controls apply to fallback matching?","document_id":"FIN-SOP-001","passage":"Exactly one candidate must qualify."},
+  {"id":"late","query":"What is the calendar day settlement window?","document_id":"FIN-SET-001","passage":"two-calendar-day settlement window"},
+  {"id":"missing","query":"How should a missing settlement be investigated before the deadline?","document_id":"FIN-SET-001","passage":"pending delivery rather than a proven SLA breach"},
+  {"id":"fee","query":"What is the standard domestic processing fee?","document_id":"FIN-FEE-001","passage":"2.50 percent of gross amount"},
+  {"id":"refund","query":"Are original processing fees returned on a refund?","document_id":"FIN-FEE-001","passage":"not automatically returned on a refund"},
+  {"id":"fx","query":"What foreign exchange reference evidence must treasury provide?","document_id":"FIN-FX-001","passage":"currency pair, quoted exchange rate, rate timestamp and provider reference"},
+  {"id":"contract","query":"Which merchant agreement version and effective date should be selected?","document_id":"FIN-MER-001","passage":"effective on the payment event date"},
+  {"id":"duplicate","query":"What is the duplicate settlement investigation procedure?","document_id":"FIN-EXC-001","passage":"two transfers or only duplicate records"},
+  {"id":"partial","query":"How do we investigate a partial settlement?","document_id":"FIN-EXC-001","passage":"outstanding tranche reference and expected completion date"},
+  {"id":"escalation","query":"When does a high impact discrepancy require escalation to the operations manager?","document_id":"FIN-ESC-001","passage":"INR 100000.00 or more"},
+  {"id":"money","query":"What do gross_amount net_amount and settled_amount mean?","document_id":"FIN-DATA-001","passage":"net_amount is the ledger expected amount after fees"},
+  {"id":"timestamp","query":"Is settlement_date a timezone-aware transfer timestamp?","document_id":"FIN-DATA-001","passage":"calendar date, not a timezone-aware transfer instant"}
+]
