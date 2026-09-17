@@ -54,7 +54,9 @@ When `DATABASE_URL` is present, ingestion writes `policies` and `policy_chunks.e
 
 PostgreSQL retrieval uses pgvector `<=>` cosine distance and filters by embedding version, writer and effective dates. NULL embeddings and other embedding spaces are excluded. Exact search is intentional for this small corpus; no approximate index is added. Run ingestion explicitly before PG search: startup never mutates the database. A database connection/schema failure propagates; the service must not silently switch to stale local evidence. `--offline` always forces memory even when the environment has a database URL.
 
-**No live PostgreSQL/pgvector run has been performed locally: Docker and PostgreSQL are unavailable.** SQL integration, permissions and query plans still require a live database check. Offline tests do not establish that the PG path works end to end.
+Live storage validation passed on a disposable PostgreSQL 16.2 server with pgvector 0.6.2 supplied by `pgserver==0.1.4` (validation tooling only, not a runtime dependency). The existing `PostgresStore` ingested 8 policies and 24 non-NULL embeddings. Repeating ingestion retained exactly 8 policies/24 chunks. The fixed 12-question evaluation measured Recall@3 = 1.0 and MRR@3 = 1.0; citations verified and all three unrelated/stop-word queries abstained. Full measured output: `ai-service/evaluation/p7_postgres_metrics.json`. The scratch server was stopped after validation.
+
+Migration limitation: the packaged server lacks `pgcrypto`. V1 therefore failed unchanged. For this storage experiment only, its `CREATE EXTENSION IF NOT EXISTS pgcrypto` statement was omitted from the SQL in memory; PostgreSQL 16's built-in `gen_random_uuid()` supplied UUID generation. V1–V4 table definitions were otherwise applied unchanged. Repository migrations were not edited. This proves the RAG PostgreSQL storage/retrieval path on the scratch schema, **not** unmodified migration installation, production permissions, Docker deployment, or full backend integration.
 
 ## P8 API
 
