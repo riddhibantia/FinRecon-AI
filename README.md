@@ -145,6 +145,16 @@ carries `X-Request-Id`. Repeats are idempotent (payments via
 - Checks in fixed order: duplicate, missing, amount, unknown, fee, net,
   FX, status, late settlement. No LLM/ML decides numeric truth.
 
+## P4 cases (exception-service :8083, needs PostgreSQL at runtime)
+
+- `POST /api/cases/sync {"runId":"..."}` — opens one case per MISMATCHED
+  result (idempotent; matched results never become cases).
+- `GET /api/cases?status=&category=&assignedTo=` — analyst queue filters.
+- `GET /api/cases/{id}` — detail: exception, evidence, source records,
+  resolution actions, audit trail, rule version.
+- `POST /api/cases/{id}/assign`, `/resolve`, `/escalate` — lifecycle
+  transitions; illegal moves are 422 with `ILLEGAL_TRANSITION`.
+
 ## Project structure
 
 ```text

@@ -59,3 +59,20 @@ P3 decision log:
 - Reconciliation duplicates the three source-table mappings as read-only
   views; ingestion remains the sole writer (bounded-context views, no
   shared module, no P0 boundary change).
+
+P4 decision log:
+
+- Entity `ReconException` maps table `exceptions`; `Exception` alone would
+  shadow `java.lang.Exception`.
+- Case category copies the result `mismatch_type` 1:1 (shared taxonomy
+  vocabulary). Severity is a documented placeholder: |amountDifference| > 0
+  -> HIGH else MEDIUM — the master fixes no severity values.
+- Lifecycle enforced in the entity (OPEN -> INVESTIGATING -> RESOLVED;
+  OPEN/INVESTIGATING -> ESCALATED; terminal states immutable). Every
+  transition writes a resolution_actions row and an audit_logs row.
+- Evidence rows quote stored values only (expected vs observed per
+  category); absence is recorded as "absent", never invented.
+- `audit_logs.metadata` uses Hibernate's built-in JSON type code (no new
+  library) so Postgres jsonb and H2 JSON both accept it.
+- Sync is idempotent: results that already have cases are skipped and
+  counted; only MISMATCHED results open cases.

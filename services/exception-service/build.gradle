@@ -7,9 +7,18 @@ plugins {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // P4: case/exception/evidence/action/audit persistence. Schema from
+    // db/migrations via Flyway; Hibernate validates only.
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // H2 serves @SpringBootTest only (Flyway off, create-drop).
+    testRuntimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    // Lets filesystem:db/migrations resolve when tests need the repo root.
+    workingDir = rootDir
 }
