@@ -95,7 +95,7 @@ py -3.14 -m uv run --python 3.12 --no-project --with-requirements requirements.t
 
 Coverage includes all named tools, Decimal tolerance boundaries, missing evidence, conflicting evidence, invalid backend results, unavailable transport, independent rejection of fabricated source excerpts, citation metadata mismatch, classifier disagreement, unsupported summary claims, missing snapshots/artifacts, structured output, endpoint injection, and absence of resolve/escalate transport calls.
 
-Measured targeted result: `tests/test_agent.py` passed **30 tests in 2.71s**, with one upstream Starlette/AnyIO `BlockingPortal` deprecation warning. This run exercised the real graph, injected HTTP route, failure paths, and human-review boundary without model artifacts or network. Main still owns full P6/P7/P8 regression and live integration verification before declaring P8 green. No accuracy, resolution success rate, or production-readiness measurement is claimed.
+Measured targeted result: `tests/test_agent.py` passed **30 tests in 2.71s**, with one upstream Starlette/AnyIO `BlockingPortal` deprecation warning. This run exercised the real graph, injected HTTP route, failure paths, and human-review boundary without model artifacts or network. Main full regression (post-commit): **66 passed, 1 deprecation warning in 9.07s** — 30 agent, 15 classifier, 9 case-features, 11 RAG, 1 health. No accuracy, resolution success rate, or production-readiness measurement is claimed; live P4/P6/P7 integration still requires a configured backend.
 
 ## Limitations
 
