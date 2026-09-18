@@ -11,6 +11,7 @@ Java mirror of the core tables: `services/ingestion-service/.../domain/`.
 | V2 | `db/migrations/V2__reconciliation.sql` | reconciliation_runs, reconciliation_results |
 | V3 | `db/migrations/V3__exceptions.sql` | exceptions, exception_evidence, resolution_actions |
 | V4 | `db/migrations/V4__knowledge_ai_audit.sql` | policies, policy_chunks, ai_investigations, ai_tool_calls, ai_citations, analyst_feedback, audit_logs |
+| V5 | `db/migrations/V5__currency_varchar.sql` | alters only: currency CHAR(3) → VARCHAR(3) on the three V1 tables |
 
 Applied by Flyway at service startup (`spring.flyway.locations=filesystem:db/migrations`).
 Each version runs once per database, tracked in `flyway_schema_history`.
@@ -40,7 +41,8 @@ facts are never cascade-deleted. Retention deletes are a P4/P11 decision.
 
 `payments` — gateway record. PK `payment_id UUID DEFAULT gen_random_uuid()`.
 `external_txn_id TEXT UNIQUE NOT NULL` (stable P3 match key), `customer_id`,
-`merchant_id`, `amount NUMERIC(18,2) >= 0`, `currency CHAR(3)` ISO check,
+`merchant_id`, `amount NUMERIC(18,2) >= 0`, `currency VARCHAR(3)` (V5;
+V1 CHAR(3)) ISO check,
 `status TEXT`, `event_time TIMESTAMPTZ`, `created_at` default now().
 Index on `(merchant_id, event_time)` for the P3 fallback key.
 
@@ -104,8 +106,11 @@ Indexes on `(entity_type, entity_id)`, `timestamp`, `actor_id`.
 ## Conventions
 
 - PKs: `UUID DEFAULT gen_random_uuid()` everywhere.
-- Money: `NUMERIC(18, 2)` with `>= 0` checks. Currency: `CHAR(3)` with
-  `^[A-Z]{3}$` check. Timestamps: `TIMESTAMPTZ`, `created_at` defaults now().
+- Money: `NUMERIC(18, 2)` with `>= 0` checks. Currency: `VARCHAR(3)` since
+  V5 (was `CHAR(3)`/bpchar in V1; the ORM resolves Java String to VARCHAR
+  and strict validation rejects bpchar — found by live PostgreSQL boot,
+  invisible to H2) with `^[A-Z]{3}$` check. Timestamps: `TIMESTAMPTZ`,
+  `created_at` defaults now().
 - Status CHECKs exist only where the master fixes the values (exception
   category, exception status, run status). Source-record statuses stay open
   TEXT so P1 invents no workflow rules.

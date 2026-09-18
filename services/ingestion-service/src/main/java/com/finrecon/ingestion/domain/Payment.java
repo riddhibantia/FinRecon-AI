@@ -35,6 +35,7 @@ public class Payment {
     @Column(name = "amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal amount;
 
+    // V5 stores ISO codes as VARCHAR(3); the CHECK keeps the shape.
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
 

@@ -141,3 +141,21 @@ P12 decision log:
   (same classpath location), so probe flags repeat in test resources;
   also fixed a self-matching hygiene regex and a duplicated properties
   tail, both caught by tests before commit.
+
+Live-Docker decision log (machine with Docker, first real deployment):
+
+- Kafka (apache/kafka:3.8.0 KRaft) needed three compose fixes: listener
+  security protocol map, controller listener names, inter-broker listener
+  name; healthcheck uses /opt/kafka/bin/kafka-broker-api-versions.sh
+  (no 'cub' in this image); single-node requires offsets/txn RF=1 or the
+  group coordinator never comes up (found via FIND_COORDINATOR timeout).
+- Dual listeners: INTERNAL kafka:29092 for containers, EXTERNAL
+  localhost:9092 for host tools; single-advertise breaks one side.
+- Java images build FROM gradle:8.9-jdk21 (temurin-jdk has no gradle).
+- V5 currency CHAR(3)->VARCHAR(3): live Postgres boot proved bpchar
+  fails Hibernate validation; mapping-only workarounds
+  (columnDefinition, JdbcTypeCode CHAR) do not satisfy the validator.
+  H2 never catches this class of mismatch.
+- Rebuilds must be verified by image age + migration log lines: an
+  'up -d --build' with empty output left stale images running twice.
+  Trust 'Migrating schema to version N', not the exit code.

@@ -38,6 +38,7 @@ public class LedgerEntry {
     @Column(name = "net_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal netAmount;
 
+    // V5 stores ISO codes as VARCHAR(3); the CHECK keeps the shape.
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
 

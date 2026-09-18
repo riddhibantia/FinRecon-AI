@@ -18,6 +18,7 @@ EXPECTED_FILES = [
     "V2__reconciliation.sql",
     "V3__exceptions.sql",
     "V4__knowledge_ai_audit.sql",
+    "V5__currency_varchar.sql",
 ]
 
 # Every canonical entity from FINRECON_MASTER.md #11 must exist.
@@ -122,7 +123,24 @@ def test_ddl_is_guarded_and_rerunnable():
             and "IF NOT EXISTS" not in line
         ]
         assert not bare_tables, f"{name}: unguarded DDL {bare_tables}"
-        assert "CREATE INDEX IF NOT EXISTS" in body, f"{name}: unguarded index"
+        bare_alters = [
+            line for line in body.splitlines()
+            if re.match(r"\s*ALTER TABLE\s+", line)
+            and "IF EXISTS" not in line
+        ]
+        assert not bare_alters, f"{name}: unguarded ALTER {bare_alters}"
+        creates = [line for line in body.splitlines()
+                   if re.match(r"\s*CREATE (TABLE|INDEX)", line)]
+        if creates:
+            assert "CREATE INDEX IF NOT EXISTS" in body, f"{name}: unguarded index"
+
+
+def test_v5_alters_only_currency_to_varchar():
+    v5 = _sql()["V5__currency_varchar.sql"]
+    assert "CREATE TABLE" not in v5  # additive alter, no new tables
+    assert v5.count("ALTER TABLE IF EXISTS") == 3  # payments + ledger + settlement
+    assert "TYPE VARCHAR(3)" in v5
+    assert "currency" in v5
 
 
 def test_seed_stores_three_linked_source_records():

@@ -30,12 +30,23 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${KAFKA_PORT:-9092}
+      # INTERNAL for containers, EXTERNAL for host tools: each side gets an
+      # address it can actually reach (single-advertise breaks one side).
+      KAFKA_LISTENERS: INTERNAL://:29092,CONTROLLER://:9093,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:${KAFKA_PORT:-9092}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Single-node dev broker: internal topics must fit on one replica or
+      # the group coordinator never comes up (default asks for 3).
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     healthcheck:
-      test: ["CMD-SHELL", "cub kafka-ready -b localhost:9092 1 5"]
+      test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
       interval: 15s
       timeout: 10s
       retries: 8
@@ -69,8 +80,16 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-finrecon}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       FRONTEND_ORIGIN: http://localhost:${FRONTEND_PORT:-3000}
+      finrecon_messaging_enabled: "true"
+      finrecon_redis_enabled: "true"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      REDIS_HOST: redis
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   reconciliation-service:
