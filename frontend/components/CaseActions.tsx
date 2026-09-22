@@ -66,21 +66,25 @@ export default function CaseActions({
         <>
           {status === "OPEN" && (
             <form
+              aria-label="Assign case"
               onSubmit={(e) => {
                 e.preventDefault();
                 void run("assign", { assignedTo, actorId: assignedTo });
               }}
             >
               <div className="row">
-                <label className="field">
+                <label className="field" htmlFor="assign-to">
                   Assign to analyst
                   <input
+                    id="assign-to"
                     value={assignedTo}
                     onChange={(e) => setAssignedTo(e.target.value)}
                     required
+                    maxLength={128}
+                    autoComplete="off"
                   />
                 </label>
-                <button type="submit" disabled={pending}>
+                <button type="submit" disabled={pending} aria-busy={pending}>
                   Assign
                 </button>
               </div>
@@ -89,6 +93,7 @@ export default function CaseActions({
           {status === "INVESTIGATING" && (
             <>
               <form
+                aria-label="Resolve case"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void run("resolve", {
@@ -100,27 +105,32 @@ export default function CaseActions({
                 }}
               >
                 <div className="row">
-                  <label className="field">
+                  <label className="field" htmlFor="resolve-action">
                     Resolution
                     <input
+                      id="resolve-action"
                       value={resolveAction}
                       onChange={(e) => setResolveAction(e.target.value)}
                       required
+                      maxLength={64}
                     />
                   </label>
-                  <label className="field">
+                  <label className="field" htmlFor="resolve-notes">
                     Notes
                     <input
+                      id="resolve-notes"
                       value={resolveNotes}
                       onChange={(e) => setResolveNotes(e.target.value)}
+                      maxLength={500}
                     />
                   </label>
-                  <button type="submit" disabled={pending}>
+                  <button type="submit" disabled={pending} aria-busy={pending}>
                     Resolve
                   </button>
                 </div>
               </form>
               <form
+                aria-label="Escalate case"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void run("escalate", {
@@ -131,14 +141,16 @@ export default function CaseActions({
                 }}
               >
                 <div className="row">
-                  <label className="field">
+                  <label className="field" htmlFor="escalate-notes">
                     Escalation notes
                     <input
+                      id="escalate-notes"
                       value={escalateNotes}
                       onChange={(e) => setEscalateNotes(e.target.value)}
+                      maxLength={500}
                     />
                   </label>
-                  <button type="submit" disabled={pending}>
+                  <button type="submit" disabled={pending} aria-busy={pending} className="secondary">
                     Escalate
                   </button>
                 </div>

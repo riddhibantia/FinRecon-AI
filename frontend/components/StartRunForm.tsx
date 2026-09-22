@@ -36,17 +36,26 @@ export default function StartRunForm() {
   return (
     <div className="card">
       <h2>Start a reconciliation run</h2>
-      <form onSubmit={start}>
+      <form onSubmit={start} aria-label="Start reconciliation run">
         <div className="row">
-          <label className="field">
+          <label className="field" htmlFor="source-set">
             Source set
-            <input value={sourceSet} onChange={(e) => setSourceSet(e.target.value)} required />
+            <input
+              id="source-set"
+              value={sourceSet}
+              onChange={(e) => setSourceSet(e.target.value)}
+              required
+              maxLength={64}
+              pattern="[A-Za-z0-9_-]+"
+              autoComplete="off"
+            />
           </label>
-          <button type="submit" disabled={pending}>
+          <button type="submit" disabled={pending} aria-busy={pending}>
             {pending ? "Running…" : "Run reconciliation"}
           </button>
         </div>
       </form>
+      <div aria-live="polite">
       {error && (
         <Notice kind="error" title="Run failed">
           {error}
@@ -58,11 +67,12 @@ export default function StartRunForm() {
             Run <strong>{summary.runId}</strong>: {summary.matched} matched,{" "}
             {summary.mismatched} mismatched of {summary.total} (rule {summary.ruleVersion}).
           </p>
-          <button type="button" onClick={() => router.push(`/runs/${summary.runId}`)}>
+          <button type="button" className="secondary" onClick={() => router.push(`/runs/${summary.runId}`)}>
             Open results
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }

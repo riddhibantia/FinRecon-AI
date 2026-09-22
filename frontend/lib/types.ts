@@ -41,6 +41,16 @@ export interface AuditRow {
   timestamp: string;
 }
 
+export interface FeedbackRow {
+  feedbackId: string;
+  exceptionId: string;
+  analystId: string;
+  originalValue: string | null;
+  correctedValue: string;
+  reason: string | null;
+  createdAt: string;
+}
+
 export interface CaseDetail extends CaseSummary {
   resolvedAt: string | null;
   runId: string;
@@ -51,6 +61,32 @@ export interface CaseDetail extends CaseSummary {
   evidence: EvidenceRow[];
   caseActions: CaseActionRow[];
   auditTrail: AuditRow[];
+  feedback: FeedbackRow[];
+}
+
+export interface KpiReport {
+  generatedAt: string;
+  runs: { total: number; completed: number; failed: number };
+  results: { total: number; matched: number; mismatched: number; autoMatchRate: string | null };
+  cases: {
+    total: number;
+    open: number;
+    investigating: number;
+    resolved: number;
+    escalated: number;
+    byCategory: { category: string; count: number }[];
+    bySeverity: { severity: string; count: number }[];
+  };
+  impact: { absoluteUnresolvedDifference: string; highSeverityUnresolved: number };
+  feedback: { total: number; corrections: number };
+}
+
+export interface AgeingReport {
+  generatedAt: string;
+  unresolvedTotal: number;
+  olderThanDays: number;
+  openOlderThanBoundary: number;
+  oldestUnresolvedCreatedAt: string | null;
 }
 
 export interface RunSummary {

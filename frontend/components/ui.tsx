@@ -1,7 +1,13 @@
 import { statusTone } from "@/lib/format";
 
 export function Badge({ status }: { status: string | null | undefined }) {
-  return <span className={`badge ${statusTone(status)}`}>{status ?? "—"}</span>;
+  // Nike DESIGN.md: pill, flat, text signal only (sale/success) — never bg color.
+  // Text label itself carries meaning, so status is never color-only.
+  return (
+    <span className={`badge ${statusTone(status)}`} aria-label={`status ${status ?? "unknown"}`}>
+      {status ?? "—"}
+    </span>
+  );
 }
 
 export function Notice({
@@ -14,7 +20,7 @@ export function Notice({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`notice ${kind}`}>
+    <div className={`notice ${kind}`} role={kind === "error" ? "alert" : "status"}>
       <strong>{title}</strong>
       <div>{children}</div>
     </div>

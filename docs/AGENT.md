@@ -76,7 +76,7 @@ From `ai-service`, install/run with the repo's Python 3.12 environment:
 py -3.14 -m uv run --python 3.12 --no-project --with-requirements requirements.txt python -m uvicorn app:app --port 8000
 ```
 
-For the default HTTP route, set `FINRECON_CASE_API_URL` to the P4 service origin. Set `FINRECON_MODEL_DIR` to an operator-trusted P6 model directory, or use the default `ai-service/artifacts/p6/models`. `/investigate` returns HTTP 503 when model artifacts or the case API configuration are absent. `/health` remains available. The default route uses the local in-memory P7 retriever and does not connect to Postgres. The Python API accepts an injected retriever and `SourceVerifier(policy_dir=...)` for another trusted corpus.
+For the default HTTP route, set `FINRECON_API_URL` to the monolith origin (default `http://localhost:8080`). Set `FINRECON_MODEL_DIR` to an operator-trusted P6 model directory, or use the default `ai-service/artifacts/p6/models`. `/investigate` returns HTTP 503 when model artifacts or the case API configuration are absent. `/health` remains available. The default route uses the local in-memory P7 retriever and does not connect to Postgres. The Python API accepts an injected retriever and `SourceVerifier(policy_dir=...)` for another trusted corpus.
 
 Default P4 records lack the full P6 numeric/timestamp snapshot. Thus the default HTTP integration reports null classifier confidence even when a model is installed. To use classification, construct `ToolRegistry(transport, retriever, snapshot_loader=...)` with an actual source adapter, then `Investigator(tools, predictor)`. `create_app(..., investigator=...)` supports this configured investigator without adding a public endpoint that accepts untrusted source facts.
 

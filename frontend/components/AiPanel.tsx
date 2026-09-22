@@ -46,25 +46,36 @@ export default function AiPanel({ exceptionId }: { exceptionId: string }) {
         Cited, read-only analysis. It cannot change the case — assign, resolve, or escalate
         below when you agree.
       </p>
-      <form onSubmit={investigate}>
+      <form onSubmit={investigate} aria-label="Request AI investigation">
         <div className="row">
-          <label className="field">
+          <label className="field" htmlFor="ai-asof">
             Policy date (as_of)
-            <input type="date" value={asOf} onChange={(e) => setAsOf(e.target.value)} required />
+            <input
+              id="ai-asof"
+              type="date"
+              value={asOf}
+              onChange={(e) => setAsOf(e.target.value)}
+              required
+            />
           </label>
-          <label className="field">
+          <label className="field" htmlFor="ai-tolerance">
             Tolerance (optional)
             <input
+              id="ai-tolerance"
               value={tolerance}
               onChange={(e) => setTolerance(e.target.value)}
               placeholder="0.01"
+              inputMode="decimal"
+              autoComplete="off"
             />
           </label>
-          <button type="submit" disabled={pending}>
+          <button type="submit" disabled={pending} aria-busy={pending}>
             {pending ? "Investigating…" : "Request investigation"}
           </button>
         </div>
       </form>
+
+      <div aria-live="polite">
 
       {error && (
         <Notice kind="error" title="Investigation unavailable">
@@ -94,6 +105,18 @@ export default function AiPanel({ exceptionId }: { exceptionId: string }) {
               ? `withheld (${display(result.confidence_reason)})`
               : result.confidence}
           </p>
+          {typeof result.confidence === "number" && (
+            <div
+              className="confidence-bar"
+              role="img"
+              aria-label={`confidence ${result.confidence} percent`}
+            >
+              <div
+                className="confidence-fill"
+                style={{ width: `${Math.max(0, Math.min(100, result.confidence))}%` }}
+              />
+            </div>
+          )}
 
           {result.reasons.length > 0 && (
             <>
@@ -110,12 +133,13 @@ export default function AiPanel({ exceptionId }: { exceptionId: string }) {
             <>
               <h3>Evidence used</h3>
               <table className="grid">
+                <caption className="muted">Sources cited by the investigation</caption>
                 <thead>
                   <tr>
-                    <th>Source</th>
-                    <th>Field</th>
-                    <th>Expected</th>
-                    <th>Observed</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">Field</th>
+                    <th scope="col">Expected</th>
+                    <th scope="col">Observed</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -159,6 +183,7 @@ export default function AiPanel({ exceptionId }: { exceptionId: string }) {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

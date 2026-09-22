@@ -4,6 +4,11 @@
 // never sees them (server components and /api proxies only).
 export const REQUEST_ID_HEADER = "X-Request-Id";
 
+// Single backend origin for the monolith. All APIs live on 8080.
+export function apiOrigin(): string {
+  return process.env.FINRECON_API_URL ?? "http://localhost:8080";
+}
+
 // Case lifecycle actions the UI may invoke. Closed set: the proxy route
 // rejects anything else, so the dashboard cannot invent P4 transitions.
 export const CASE_ACTIONS = ["assign", "resolve", "escalate"] as const;
@@ -14,11 +19,11 @@ export function isCaseAction(value: string | null | undefined): value is CaseAct
 }
 
 export function caseApiOrigin(): string {
-  return process.env.FINRECON_CASE_API_URL ?? "http://localhost:8083";
+  return apiOrigin();
 }
 
 export function reconApiOrigin(): string {
-  return process.env.FINRECON_RECON_API_URL ?? "http://localhost:8082";
+  return apiOrigin();
 }
 
 export function aiApiOrigin(): string {
@@ -56,8 +61,26 @@ export function buildRunResultsUrl(origin: string, runId: string): string {
   return `${origin}/api/reconcile/runs/${encodeURIComponent(runId)}/results`;
 }
 
+export function reportingApiOrigin(): string {
+  return apiOrigin();
+}
+
 export function buildInvestigateUrl(origin: string): string {
   return `${origin}/investigate`;
+}
+
+// FR-11 analyst feedback: append-only confirm/correct on a case.
+export function buildFeedbackUrl(origin: string, id: string): string {
+  return `${origin}/api/cases/${encodeURIComponent(id)}/feedback`;
+}
+
+// FR-13 read-only reporting projections.
+export function buildKpisUrl(origin: string): string {
+  return `${origin}/api/reports/kpis`;
+}
+
+export function buildAgeingUrl(origin: string): string {
+  return `${origin}/api/reports/ageing`;
 }
 
 export interface HealthTarget {
@@ -65,27 +88,11 @@ export interface HealthTarget {
   url: string;
 }
 
-// Services shown on the dashboard home page. Ports follow docker-compose
-// and the root .env.template; all paths are the P0 health contract.
+// Services shown on the dashboard home page.
 export function serviceHealthTargets(): HealthTarget[] {
   return [
-    { name: "gateway-service", url: `${gatewayOrigin()}/api/health` },
-    { name: "ingestion-service", url: `${ingestionOrigin()}/api/health` },
-    { name: "reconciliation-service", url: `${reconApiOrigin()}/api/health` },
-    { name: "exception-service", url: `${caseApiOrigin()}/api/health` },
-    { name: "reporting-service", url: `${reportingOrigin()}/api/health` },
+    { name: "finrecon-app", url: `${apiOrigin()}/api/health` },
     { name: "ai-service", url: `${aiApiOrigin()}/health` },
   ];
 }
 
-function gatewayOrigin(): string {
-  return process.env.FINRECON_GATEWAY_API_URL ?? "http://localhost:8080";
-}
-
-function ingestionOrigin(): string {
-  return process.env.FINRECON_INGEST_API_URL ?? "http://localhost:8081";
-}
-
-function reportingOrigin(): string {
-  return process.env.FINRECON_REPORTING_API_URL ?? "http://localhost:8084";
-}

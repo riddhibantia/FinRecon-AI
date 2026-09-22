@@ -6,14 +6,18 @@ import assert from "node:assert/strict";
 import {
   CASE_ACTIONS,
   REQUEST_ID_HEADER,
+  buildAgeingUrl,
   buildCaseActionUrl,
   buildCaseDetailUrl,
   buildCaseQueueUrl,
+  buildFeedbackUrl,
   buildInvestigateUrl,
+  buildKpisUrl,
   buildRunResultsUrl,
   buildRunStartUrl,
   buildRunUrl,
   isCaseAction,
+  reportingApiOrigin,
   serviceHealthTargets,
 } from "../test-dist/lib/backend.js";
 
@@ -64,16 +68,22 @@ test("correlation header name is fixed", () => {
   assert.equal(REQUEST_ID_HEADER, "X-Request-Id");
 });
 
-test("health targets cover every backend", () => {
+test("health targets cover the monolith and AI service", () => {
   const names = serviceHealthTargets().map((t) => t.name);
   for (const expected of [
-    "gateway-service",
-    "ingestion-service",
-    "reconciliation-service",
-    "exception-service",
-    "reporting-service",
+    "finrecon-app",
     "ai-service",
   ]) {
     assert.ok(names.includes(expected), `missing ${expected}`);
   }
+});
+
+test("feedback builder hits the FR-11 contract path and encodes the id", () => {
+  assert.equal(buildFeedbackUrl("http://x", "case/1"), "http://x/api/cases/case%2F1/feedback");
+});
+
+test("reporting builders hit the FR-13 contract paths", () => {
+  assert.equal(buildKpisUrl("http://r"), "http://r/api/reports/kpis");
+  assert.equal(buildAgeingUrl("http://r"), "http://r/api/reports/ageing");
+  assert.equal(reportingApiOrigin(), "http://localhost:8080");
 });

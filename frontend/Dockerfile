@@ -12,7 +12,10 @@ FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/package.json /app/package-lock.json ./
-COPY --from=build /app/.next ./.next
-COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static ./.next/static
+RUN chown -R node:node /app
+USER node
 EXPOSE 3000
-CMD ["npm", "run", "start", "--", "--port", "3000"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+CMD ["node", "server.js"]
