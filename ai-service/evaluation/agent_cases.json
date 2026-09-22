@@ -1,0 +1,173 @@
+[
+  {
+    "id": "missing-settlement-cited",
+    "case": {
+      "exceptionId": "11111111-1111-4111-8111-111111111111",
+      "category": "MISSING_SETTLEMENT",
+      "mismatchType": "MISSING_SETTLEMENT",
+      "sources": [
+        {"sourceType": "payment_gateway", "recordId": "p-1", "summary": "100.00 INR SUCCESS"},
+        {"sourceType": "ledger", "recordId": "l-1", "summary": "gross=100.00 fee=5.00 net=95.00"}
+      ],
+      "evidence": [
+        {"sourceType": "settlement", "sourceRecordId": "none", "fieldName": "settlement",
+         "expectedValue": "present", "observedValue": "absent"}
+      ],
+      "caseActions": [],
+      "auditTrail": [{"actorType": "SERVICE", "actorId": "exception-service",
+                      "action": "CASE_OPENED", "timestamp": "2026-09-01T10:00:00Z"}]
+    },
+    "snapshot": null,
+    "expect": {
+      "status": "HUMAN_REVIEW",
+      "draft": {"status": "DRAFT"},
+      "human_approval_required": true,
+      "must_cite_documents": ["FIN-SET-001"],
+      "summary_must_not_contain": ["funds were recovered"]
+    }
+  },
+  {
+    "id": "amount-mismatch-cited",
+    "case": {
+      "exceptionId": "22222222-2222-4222-8222-222222222222",
+      "category": "AMOUNT_MISMATCH",
+      "mismatchType": "AMOUNT_MISMATCH",
+      "sources": [
+        {"sourceType": "payment_gateway", "recordId": "p-2", "summary": "500.00 INR SUCCESS"},
+        {"sourceType": "ledger", "recordId": "l-2", "summary": "gross=499.00 fee=12.48 net=486.52"},
+        {"sourceType": "settlement", "recordId": "s-2", "summary": "settled=486.52 batch=B-9 SUCCESS"}
+      ],
+      "evidence": [
+        {"sourceType": "ledger", "sourceRecordId": "l-2", "fieldName": "gross_amount",
+         "expectedValue": "500.00", "observedValue": "499.00"}
+      ],
+      "caseActions": [],
+      "auditTrail": [{"actorType": "SERVICE", "actorId": "exception-service",
+                      "action": "CASE_OPENED", "timestamp": "2026-09-01T10:05:00Z"}]
+    },
+    "snapshot": null,
+    "expect": {
+      "status": "HUMAN_REVIEW",
+      "draft": {"status": "DRAFT"},
+      "human_approval_required": true,
+      "summary_must_not_contain": ["funds were recovered"]
+    }
+  },
+  {
+    "id": "duplicate-settlement-cited",
+    "case": {
+      "exceptionId": "33333333-3333-4333-8333-333333333333",
+      "category": "DUPLICATE_SETTLEMENT",
+      "mismatchType": "DUPLICATE_SETTLEMENT",
+      "sources": [
+        {"sourceType": "payment_gateway", "recordId": "p-3", "summary": "750.00 INR SUCCESS"},
+        {"sourceType": "ledger", "recordId": "l-3", "summary": "gross=750.00 fee=18.75 net=731.25"},
+        {"sourceType": "settlement", "recordId": "s-3a", "summary": "settled=731.25 batch=B-3 SUCCESS"},
+        {"sourceType": "settlement", "recordId": "s-3b", "summary": "settled=731.25 batch=B-3-DUP SUCCESS"}
+      ],
+      "evidence": [
+        {"sourceType": "settlement", "sourceRecordId": "s-3a", "fieldName": "settlement_count",
+         "expectedValue": "1", "observedValue": "2"}
+      ],
+      "caseActions": [],
+      "auditTrail": [{"actorType": "SERVICE", "actorId": "exception-service",
+                      "action": "CASE_OPENED", "timestamp": "2026-09-01T10:10:00Z"}]
+    },
+    "snapshot": null,
+    "expect": {
+      "status": "HUMAN_REVIEW",
+      "draft": {"status": "DRAFT"},
+      "human_approval_required": true,
+      "must_cite_documents": ["FIN-SET-001"],
+      "summary_must_not_contain": ["funds were recovered"]
+    }
+  },
+  {
+    "id": "late-settlement-cited",
+    "case": {
+      "exceptionId": "44444444-4444-4444-8444-444444444444",
+      "category": "LATE_SETTLEMENT",
+      "mismatchType": "LATE_SETTLEMENT",
+      "sources": [
+        {"sourceType": "payment_gateway", "recordId": "p-4", "summary": "200.00 INR SUCCESS"},
+        {"sourceType": "ledger", "recordId": "l-4", "summary": "gross=200.00 fee=5.00 net=195.00"},
+        {"sourceType": "settlement", "recordId": "s-4", "summary": "settled=195.00 batch=B-4 SUCCESS"}
+      ],
+      "evidence": [
+        {"sourceType": "settlement", "sourceRecordId": "s-4", "fieldName": "settlement_date",
+         "expectedValue": "on or before 2026-09-03", "observedValue": "2026-09-06"}
+      ],
+      "caseActions": [],
+      "auditTrail": [{"actorType": "SERVICE", "actorId": "exception-service",
+                      "action": "CASE_OPENED", "timestamp": "2026-09-06T09:00:00Z"}]
+    },
+    "snapshot": null,
+    "expect": {
+      "status": "HUMAN_REVIEW",
+      "draft": {"status": "DRAFT"},
+      "human_approval_required": true,
+      "must_cite_documents": ["FIN-SET-001"],
+      "summary_must_not_contain": ["funds were recovered"]
+    }
+  },
+  {
+    "id": "fee-variance-snapshot-manual",
+    "comment": "FEE_VARIANCE always lands in MANUAL_REVIEW by design: get_fee_rule is policy text only and its 'no executable fee rule store' reason is a recorded manual-review error (workflow.py retrieve_policy). The snapshot is schema-exact with settlement_window_days 2 because Predictor.predict enforces the P3 supported window; the harness runs with no predictor, so confidence stays None and is not claimed.",
+    "case": {
+      "exceptionId": "55555555-5555-4555-8555-555555555555",
+      "category": "FEE_VARIANCE",
+      "mismatchType": "FEE_VARIANCE",
+      "sources": [
+        {"sourceType": "payment_gateway", "recordId": "p-5", "summary": "10000.00 INR SUCCESS"},
+        {"sourceType": "ledger", "recordId": "l-5", "summary": "gross=10000.00 fee=250.00 net=9750.00"},
+        {"sourceType": "settlement", "recordId": "s-5", "summary": "settled=9750.00 fee=300.00 batch=B-5 SUCCESS"}
+      ],
+      "evidence": [
+        {"sourceType": "settlement", "sourceRecordId": "s-5", "fieldName": "fee_amount",
+         "expectedValue": "250.00", "observedValue": "300.00"}
+      ],
+      "caseActions": [],
+      "auditTrail": [{"actorType": "SERVICE", "actorId": "exception-service",
+                      "action": "CASE_OPENED", "timestamp": "2026-09-02T08:00:00Z"}]
+    },
+    "snapshot": {
+      "payment": {"amount": "10000.00", "currency": "INR", "status": "SUCCESS",
+                  "event_time": "2026-09-01T10:00:00+05:30"},
+      "ledgers": [{"gross_amount": "10000.00", "fee_amount": "250.00", "net_amount": "9750.00",
+                   "currency": "INR", "posting_status": "SUCCESS",
+                   "posted_at": "2026-09-01T11:00:00+05:30"}],
+      "settlements": [{"settled_amount": "9750.00", "fee_amount": "300.00", "currency": "INR",
+                       "settlement_status": "SUCCESS", "settlement_date": "2026-09-02",
+                       "batch_id": "B-5"}],
+      "context": {"settlement_window_days": 2}
+    },
+    "expect": {
+      "status": "MANUAL_REVIEW",
+      "human_approval_required": true,
+      "must_cite_documents": ["FIN-FEE-001"],
+      "summary_must_not_contain": ["funds were recovered"]
+    }
+  },
+  {
+    "id": "no-evidence-manual-review",
+    "comment": "No compared source fields: load_evidence records 'Insufficient evidence', so the graph must land in MANUAL_REVIEW with no draft and no citations rather than guessing.",
+    "case": {
+      "exceptionId": "66666666-6666-4666-8666-666666666666",
+      "category": "UNKNOWN_EXCEPTION",
+      "mismatchType": "UNKNOWN_EXCEPTION",
+      "sources": [
+        {"sourceType": "payment_gateway", "recordId": "p-6", "summary": "10.00 INR PENDING"}
+      ],
+      "evidence": [],
+      "caseActions": [],
+      "auditTrail": [{"actorType": "SERVICE", "actorId": "exception-service",
+                      "action": "CASE_OPENED", "timestamp": "2026-09-03T12:00:00Z"}]
+    },
+    "snapshot": null,
+    "expect": {
+      "status": "MANUAL_REVIEW",
+      "human_approval_required": true,
+      "summary_must_not_contain": ["funds were recovered"]
+    }
+  }
+]

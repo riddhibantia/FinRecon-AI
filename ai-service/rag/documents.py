@@ -56,8 +56,13 @@ def parse_policy(path: Path) -> Policy:
     if end is not None and end < start:
         raise ValueError(f"{path.name}: effective_to precedes effective_from")
     policy_id = str(uuid5(NAMESPACE, fields["document_id"] + ":" + fields["version"]))
+    try:
+        repo_root = Path(__file__).resolve().parents[2]
+        source_uri = Path(path).resolve().relative_to(repo_root).as_posix()
+    except (OSError, ValueError):
+        source_uri = Path(path).name
     return Policy(policy_id, fields["document_id"], fields["title"], fields["version"], start, end,
-                  path.resolve().as_uri(), content, hashlib.sha256(raw).hexdigest(), front.end())
+                  source_uri, content, hashlib.sha256(raw).hexdigest(), front.end())
 
 
 def chunk_policy(policy: Policy, chunk_size: int = CHUNK_SIZE, overlap: int = OVERLAP) -> list[Chunk]:

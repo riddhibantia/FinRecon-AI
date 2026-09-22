@@ -11,7 +11,7 @@ class InvestigationRequest(BaseModel):
     exceptionId: UUID
     as_of: date = Field(default_factory=date.today)
     # No invented default tolerance. None means no tolerance judgment.
-    tolerance: str | None = None
+    tolerance: str | int | float | None = None
 
 
 class BackendEvidence(BaseModel):

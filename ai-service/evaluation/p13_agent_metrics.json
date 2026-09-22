@@ -1,0 +1,87 @@
+{
+  "evaluated_at": "2026-09-19",
+  "cases": [
+    {
+      "id": "missing-settlement-cited",
+      "success": true,
+      "codes": [],
+      "status": "HUMAN_REVIEW",
+      "draft_status": "DRAFT",
+      "confidence": null,
+      "citations": [
+        "FIN-SET-001",
+        "FIN-SOP-001",
+        "FIN-SET-001"
+      ]
+    },
+    {
+      "id": "amount-mismatch-cited",
+      "success": true,
+      "codes": [],
+      "status": "HUMAN_REVIEW",
+      "draft_status": "DRAFT",
+      "confidence": null,
+      "citations": [
+        "FIN-DATA-001",
+        "FIN-SOP-001",
+        "FIN-EXC-001"
+      ]
+    },
+    {
+      "id": "duplicate-settlement-cited",
+      "success": true,
+      "codes": [],
+      "status": "HUMAN_REVIEW",
+      "draft_status": "DRAFT",
+      "confidence": null,
+      "citations": [
+        "FIN-SOP-001",
+        "FIN-SET-001",
+        "FIN-EXC-001"
+      ]
+    },
+    {
+      "id": "late-settlement-cited",
+      "success": true,
+      "codes": [],
+      "status": "HUMAN_REVIEW",
+      "draft_status": "DRAFT",
+      "confidence": null,
+      "citations": [
+        "FIN-SOP-001",
+        "FIN-SET-001",
+        "FIN-SET-001"
+      ]
+    },
+    {
+      "id": "fee-variance-snapshot-manual",
+      "success": true,
+      "codes": [],
+      "status": "MANUAL_REVIEW",
+      "draft_status": null,
+      "confidence": null,
+      "citations": [
+        "FIN-FEE-001",
+        "FIN-SOP-001",
+        "FIN-SET-001"
+      ]
+    },
+    {
+      "id": "no-evidence-manual-review",
+      "success": true,
+      "codes": [],
+      "status": "MANUAL_REVIEW",
+      "draft_status": null,
+      "confidence": null,
+      "citations": [
+        "FIN-SOP-001",
+        "FIN-SET-001",
+        "FIN-EXC-001"
+      ]
+    }
+  ],
+  "task_success_rate": 1.0,
+  "citation_correctness": 1.0,
+  "manual_review_rate": 0.6667,
+  "codes": []
+}

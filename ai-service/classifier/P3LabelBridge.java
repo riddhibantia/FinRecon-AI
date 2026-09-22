@@ -1,8 +1,8 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.finrecon.reconciliation.domain.Payment;
-import com.finrecon.reconciliation.domain.LedgerEntry;
-import com.finrecon.reconciliation.domain.Settlement;
+import com.finrecon.shared.domain.Payment;
+import com.finrecon.shared.domain.LedgerEntry;
+import com.finrecon.shared.domain.Settlement;
 import com.finrecon.reconciliation.reconcile.ReconciliationEngine;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

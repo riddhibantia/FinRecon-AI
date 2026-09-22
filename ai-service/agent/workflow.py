@@ -10,6 +10,7 @@ from agent.tools import ToolError, project_evidence
 from agent.verification import SourceVerifier, verify_citations, verify_evidence
 from classifier.prediction import ModelUnavailable
 from classifier.schema import Snapshot
+from pydantic import ValidationError
 
 
 class State(TypedDict, total=False):
@@ -77,10 +78,13 @@ class Investigator:
         try:
             detail = self._call(state, "get_case", exception_id=state["request"].exceptionId)
             # Validate again at the graph boundary: replacement tools remain untrusted.
-            state["case"] = CaseDetail.model_validate(detail).model_dump(mode="json")
+            try:
+                state["case"] = CaseDetail.model_validate(detail).model_dump(mode="json")
+            except ValidationError as exc:
+                raise ToolError("invalid case detail") from exc
             if state["case"]["exceptionId"] != str(state["request"].exceptionId):
                 raise ToolError("case identity mismatch")
-        except (ToolError, ValueError, TypeError) as exc:
+        except (ToolError, OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
             state["case"] = {}
             state["errors"].append(f"Case evidence unavailable: {exc}")
             return state
@@ -91,23 +95,30 @@ class Investigator:
             elif self.predictor is None:
                 state["confidence_reason"] = "Trained classifier artifact unavailable"
             else:
-                prediction = self.predictor.predict(Snapshot.model_validate(source["snapshot"]))
+                try:
+                    snapshot = Snapshot.model_validate(source["snapshot"])
+                except ValidationError as exc:
+                    raise ToolError("invalid classifier snapshot") from exc
+                prediction = self.predictor.predict(snapshot)
                 confidence = prediction["confidence"]
                 if (isinstance(confidence, bool) or not isinstance(confidence, (int, float))
                         or not math.isfinite(confidence) or not 0 <= confidence <= 1
                         or not isinstance(prediction.get("category"), str)):
                     raise ToolError("invalid classifier probability")
                 state["prediction"] = prediction
-        except (ToolError, ModelUnavailable, ValueError, TypeError, KeyError) as exc:
+        except (ToolError, ModelUnavailable, OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
             state["confidence_reason"] = f"Classifier unavailable: {exc}"
         return state
 
     def load_evidence(self, state):
         if state["case"]:
             try:
-                state["evidence"] = project_evidence(CaseDetail.model_validate(state["case"]).evidence)
+                try:
+                    state["evidence"] = project_evidence(CaseDetail.model_validate(state["case"]).evidence)
+                except ValidationError as exc:
+                    raise ToolError("invalid case detail") from exc
                 self._call(state, "get_case_history", exception_id=state["request"].exceptionId, case=state["case"])
-            except (ToolError, ValueError, TypeError) as exc:
+            except (ToolError, OSError, ValidationError, ValueError, TypeError, KeyError, AttributeError) as exc:
                 state["errors"].append(f"Invalid evidence or history: {exc}")
         if not state["evidence"]:
             state["errors"].append("Insufficient evidence: no compared source fields are available")
@@ -121,17 +132,20 @@ class Investigator:
                 result = self._call(state, name, exception_id=state["request"].exceptionId, case=state["case"])
                 if not isinstance(result.get("records"), list) or not isinstance(result.get("evidence"), list):
                     raise ToolError("invalid record projection")
-                expected_rows = project_evidence(CaseDetail.model_validate(state["case"]).evidence)
+                try:
+                    expected_rows = project_evidence(CaseDetail.model_validate(state["case"]).evidence)
+                except ValidationError as exc:
+                    raise ToolError("invalid case detail") from exc
                 _, record_errors = verify_evidence(result["evidence"], expected_rows)
                 state["errors"].extend(record_errors)
-            except ToolError as exc:
+            except (ToolError, OSError, ValidationError, ValueError, TypeError, KeyError, AttributeError) as exc:
                 state["errors"].append(str(exc))
         for index, row in enumerate(state["evidence"]):
             if row["field"] in MONEY_FIELDS and row["observed"] != "absent":
                 try:
                     result = self.tools.invoke("calculate_variance", evidence=row, tolerance=state["request"].tolerance)
                     state["tool_results"][f"variance_{index}"] = result
-                except ToolError as exc:
+                except (ToolError, OSError, ValidationError, ValueError, TypeError, KeyError, AttributeError) as exc:
                     state["errors"].append(f"Variance unavailable: {exc}")
         return state
 
@@ -140,7 +154,7 @@ class Investigator:
             try:
                 self._call(state, "find_similar_exceptions", exception_id=state["request"].exceptionId,
                            category=state["case"]["category"])
-            except ToolError as exc:
+            except (ToolError, OSError, ValidationError, ValueError, TypeError, KeyError, AttributeError) as exc:
                 state["errors"].append(f"Similar cases unavailable: {exc}")
         return state
 
@@ -160,7 +174,7 @@ class Investigator:
                 name = "get_fee_rule" if category == "FEE_VARIANCE" else "get_fx_reference"
                 policy = self._call(state, name, query=query, as_of=state["request"].as_of)
                 state["errors"].append(policy["reason"])
-        except (ToolError, KeyError, TypeError) as exc:
+        except (ToolError, OSError, ValidationError, ValueError, TypeError, KeyError, AttributeError) as exc:
             state["errors"].append(f"Policy unavailable: {exc}")
         return state
 
@@ -186,12 +200,16 @@ class Investigator:
             try:
                 state["draft"] = self._call(state, "create_resolution_draft", exception_id=state["request"].exceptionId,
                                               action=state["action"], citations=deepcopy(state["hits"]))
-            except ToolError as exc:
+            except (ToolError, OSError, ValidationError, ValueError, TypeError, KeyError, AttributeError) as exc:
                 state["errors"].append(f"Draft unavailable: {exc}")
         return state
 
     def verify_evidence_and_citations(self, state):
-        provenance = project_evidence(CaseDetail.model_validate(state["tool_results"]["get_case"]).evidence) if state["case"] else []
+        try:
+            provenance = project_evidence(CaseDetail.model_validate(state["tool_results"]["get_case"]).evidence) if state["case"] else []
+        except (ValidationError, ValueError, TypeError, KeyError, AttributeError, OSError) as exc:
+            provenance = []
+            state["errors"].append(f"Invalid case provenance: {exc}")
         state["evidence"], errors = verify_evidence(state["evidence"], provenance)
         state["errors"].extend(errors)
         draft = state["draft"]
@@ -228,7 +246,7 @@ class Investigator:
                     or any(not isinstance(item, str) or item not in sentences for item in selected)):
                 raise ValueError("Summary generator introduced an unsupported statement")
             state["summary"] = " ".join(selected)
-        except (ValueError, TypeError) as exc:
+        except (OSError, ValueError, TypeError) as exc:
             state["errors"].append(str(exc))
             state["summary"] = " ".join(sentences)
         return state

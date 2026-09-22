@@ -29,10 +29,21 @@ def case_id(value):
 
 
 def decimal_value(value):
-    if isinstance(value, bool) or not isinstance(value, (str, int, Decimal)):
-        raise ToolError("amount and tolerance must be decimal strings or integers")
+    if isinstance(value, bool):
+        raise ToolError("amount and tolerance must be decimal strings, integers, or floats")
+    if isinstance(value, float):
+        try:
+            number = Decimal(str(value))
+        except InvalidOperation as exc:
+            raise ToolError("invalid decimal") from exc
+    elif isinstance(value, (str, int, Decimal)):
+        try:
+            number = Decimal(value) if not isinstance(value, float) else Decimal(str(value))
+        except InvalidOperation as exc:
+            raise ToolError("invalid decimal") from exc
+    else:
+        raise ToolError("amount and tolerance must be decimal strings, integers, or floats")
     try:
-        number = Decimal(value)
         if not number.is_finite() or abs(number) >= Decimal("1e18") or number.as_tuple().exponent < -12:
             raise ToolError("decimal must be finite with at most 12 fractional digits and magnitude below 1e18")
         return number
@@ -88,12 +99,15 @@ class ToolRegistry:
             if not isinstance(result, dict):
                 raise ToolError(f"{name} returned a non-object result")
             return deepcopy(result)
-        except (ValidationError, httpx.HTTPError, ValueError, TypeError, KeyError, AttributeError) as exc:
+        except (ValidationError, httpx.HTTPError, OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
             raise ToolError(f"{name}: invalid input or unavailable/invalid tool result") from exc
 
     def get_case(self, exception_id):
         identity = case_id(exception_id)
-        detail = CaseDetail.model_validate(self.transport.get_case(identity))
+        try:
+            detail = CaseDetail.model_validate(self.transport.get_case(identity))
+        except ValidationError as exc:
+            raise ToolError("invalid case detail") from exc
         if str(detail.exceptionId) != identity:
             raise ToolError("backend returned a different case")
         return detail.model_dump(mode="json")
@@ -102,12 +116,19 @@ class ToolRegistry:
         identity = case_id(exception_id)
         if self.snapshot_loader is None:
             return {"status": "UNAVAILABLE", "reason": "P4 display sources cannot reconstruct a P6 source snapshot"}
-        snapshot = Snapshot.model_validate(self.snapshot_loader(identity))
+        try:
+            snapshot = Snapshot.model_validate(self.snapshot_loader(identity))
+        except ValidationError as exc:
+            raise ToolError("invalid classifier snapshot") from exc
         return {"status": "AVAILABLE", "snapshot": snapshot.model_dump(mode="json")}
 
     def _records(self, exception_id, source_type, case=None):
         identity = case_id(exception_id)
-        detail = CaseDetail.model_validate(case if case is not None else self.get_case(identity))
+        raw = case if case is not None else self.get_case(identity)
+        try:
+            detail = CaseDetail.model_validate(raw)
+        except ValidationError as exc:
+            raise ToolError("invalid case detail") from exc
         if str(detail.exceptionId) != identity:
             raise ToolError("case does not match request")
         return {"records": [source.model_dump() for source in detail.sources if source.sourceType == source_type],
@@ -167,7 +188,11 @@ class ToolRegistry:
 
     def get_case_history(self, exception_id, case=None):
         identity = case_id(exception_id)
-        detail = CaseDetail.model_validate(case if case is not None else self.get_case(identity))
+        raw = case if case is not None else self.get_case(identity)
+        try:
+            detail = CaseDetail.model_validate(raw)
+        except ValidationError as exc:
+            raise ToolError("invalid case detail") from exc
         if str(detail.exceptionId) != identity:
             raise ToolError("case does not match request")
         return {"caseActions": detail.caseActions, "auditTrail": detail.auditTrail}

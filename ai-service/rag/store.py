@@ -19,9 +19,21 @@ class MemoryStore:
         self.vectors = np.asarray(embeddings.embed_documents([embedding_text(c) for c in self.chunks]), dtype=float)
 
     def search(self, vector, k, as_of):
+        if not isinstance(k, int) or isinstance(k, bool) or not 1 <= k <= 20:
+            raise ValueError("k must be an integer between 1 and 20")
+        try:
+            query = np.asarray(vector, dtype=float)
+        except (ValueError, TypeError) as exc:
+            raise ValueError("query vector must be a finite non-empty 1-D vector") from exc
+        if query.ndim != 1 or query.shape[0] == 0 or not np.isfinite(query).all():
+            raise ValueError("query vector must be a finite non-empty 1-D vector")
         if not self.chunks:
             return []
-        scores = self.vectors @ np.asarray(vector)
+        if self.vectors.ndim != 2 or self.vectors.shape[0] != len(self.chunks):
+            raise ValueError("stored embedding dimension mismatch")
+        if query.shape[0] != self.vectors.shape[1]:
+            raise ValueError("query dimension does not match stored embeddings")
+        scores = self.vectors @ query
         candidates = [(chunk, float(score)) for chunk, score in zip(self.chunks, scores)
                       if active(chunk.metadata, as_of)]
         return sorted(candidates, key=lambda pair: (-pair[1], pair[0].chunk_id))[:k]
@@ -35,33 +47,46 @@ class PostgresStore:
 
     def connect(self):
         import psycopg
-        return psycopg.connect(self.database_url)
+        return psycopg.connect(self.database_url, connect_timeout=5)
 
     def ingest(self, policies, chunks, embeddings):
         from psycopg.types.json import Jsonb
         vectors = embeddings.embed_documents([embedding_text(c) for c in chunks])
         with self.connect() as conn:
-            with conn.cursor() as cursor:
-                for policy in policies:
-                    cursor.execute(
-                        """INSERT INTO policies (policy_id,title,version,effective_from,effective_to,source_uri)
-                        VALUES (%s,%s,%s,%s,%s,%s)
-                        ON CONFLICT (policy_id) DO UPDATE SET title=EXCLUDED.title,
-                        version=EXCLUDED.version,effective_from=EXCLUDED.effective_from,
-                        effective_to=EXCLUDED.effective_to,source_uri=EXCLUDED.source_uri""",
-                        (policy.policy_id, policy.title, policy.version, policy.effective_from,
-                         policy.effective_to, policy.source_uri))
-                    # Only replace chunks owned by this ingestion format, not other writers.
-                    cursor.execute("DELETE FROM policy_chunks WHERE policy_id=%s AND metadata->>'writer'=%s",
-                                   (policy.policy_id, "finrecon-rag-p7"))
-                for chunk, vector in zip(chunks, vectors):
-                    metadata = {**chunk.metadata, "embedding_version": EMBEDDING_VERSION, "writer": "finrecon-rag-p7"}
-                    cursor.execute(
-                        "INSERT INTO policy_chunks (chunk_id,policy_id,chunk_text,metadata,embedding) VALUES (%s,%s,%s,%s,%s::vector)",
-                        (chunk.chunk_id, chunk.policy_id, chunk.text, Jsonb(metadata), json.dumps(vector)))
+            try:
+                with conn.cursor() as cursor:
+                    for policy in policies:
+                        cursor.execute(
+                            """INSERT INTO policies (policy_id,title,version,effective_from,effective_to,source_uri)
+                            VALUES (%s,%s,%s,%s,%s,%s)
+                            ON CONFLICT (policy_id) DO UPDATE SET title=EXCLUDED.title,
+                            version=EXCLUDED.version,effective_from=EXCLUDED.effective_from,
+                            effective_to=EXCLUDED.effective_to,source_uri=EXCLUDED.source_uri""",
+                            (policy.policy_id, policy.title, policy.version, policy.effective_from,
+                             policy.effective_to, policy.source_uri))
+                        # Only replace chunks owned by this ingestion format, not other writers.
+                        cursor.execute("DELETE FROM policy_chunks WHERE policy_id=%s AND metadata->>'writer'=%s",
+                                       (policy.policy_id, "finrecon-rag-p7"))
+                    for chunk, vector in zip(chunks, vectors):
+                        metadata = {**chunk.metadata, "embedding_version": EMBEDDING_VERSION, "writer": "finrecon-rag-p7"}
+                        cursor.execute(
+                            "INSERT INTO policy_chunks (chunk_id,policy_id,chunk_text,metadata,embedding) VALUES (%s,%s,%s,%s,%s::vector)",
+                            (chunk.chunk_id, chunk.policy_id, chunk.text, Jsonb(metadata), json.dumps(vector)))
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
         return len(chunks)
 
     def search(self, vector, k, as_of: date):
+        if not isinstance(k, int) or isinstance(k, bool) or not 1 <= k <= 20:
+            raise ValueError("k must be an integer between 1 and 20")
+        try:
+            query = np.asarray(vector, dtype=float)
+        except (ValueError, TypeError) as exc:
+            raise ValueError("query vector must be a finite non-empty 1-D vector") from exc
+        if query.ndim != 1 or query.shape[0] == 0 or not np.isfinite(query).all():
+            raise ValueError("query vector must be a finite non-empty 1-D vector")
         with self.connect() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
@@ -74,7 +99,7 @@ class PostgresStore:
                          AND p.effective_from <= %s
                          AND (p.effective_to IS NULL OR p.effective_to >= %s)
                        ORDER BY c.embedding <=> %s::vector,c.chunk_id LIMIT %s""",
-                    (json.dumps(vector), EMBEDDING_VERSION, "finrecon-rag-p7", as_of, as_of,
-                     json.dumps(vector), k))
+                    (json.dumps(query.tolist()), EMBEDDING_VERSION, "finrecon-rag-p7", as_of, as_of,
+                     json.dumps(query.tolist()), k))
                 return [(Chunk(str(row[0]), str(row[1]), row[2], row[3]), float(row[4]))
                         for row in cursor.fetchall()]
