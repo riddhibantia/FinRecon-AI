@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { serviceHealthTargets } from "@/lib/backend";
+import { CircleAlert, CircleDot, Coins, ShieldAlert } from "lucide-react";
+import { buildKpisUrl, reportingApiOrigin, serviceHealthTargets } from "@/lib/backend";
+import { display } from "@/lib/format";
+import type { KpiReport } from "@/lib/types";
 import { Badge, Notice } from "@/components/ui";
+import { CategoryBarChart } from "@/components/CategoryBarChart";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +12,16 @@ interface HealthState {
   name: string;
   state: string;
   detail: string;
+}
+
+async function load<T>(url: string): Promise<T | null> {
+  try {
+    const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
 }
 
 async function checkHealth(): Promise<HealthState[]> {
@@ -35,7 +49,10 @@ async function checkHealth(): Promise<HealthState[]> {
 }
 
 export default async function Home() {
-  const health = await checkHealth();
+  const [health, kpis] = await Promise.all([
+    checkHealth(),
+    load<KpiReport>(buildKpisUrl(reportingApiOrigin())),
+  ]);
   const down = health.filter((h) => h.state !== "UP");
 
   return (
@@ -70,6 +87,60 @@ export default async function Home() {
         </Notice>
       )}
 
+      <section className="home-stats" aria-label="Key metrics">
+        {kpis === null ? (
+          <Notice kind="warn" title="KPIs unavailable">
+            The reporting service did not answer. No metric is shown rather than a guessed one.
+          </Notice>
+        ) : (
+          <>
+            <div className="stat-row">
+              <div className="stat-card">
+                <p className="stat-label">
+                  <CircleDot size={14} aria-hidden="true" />
+                  Open cases
+                </p>
+                <p className="stat-value">{display(kpis.cases.open)}</p>
+              </div>
+              <div className="stat-card">
+                <p className="stat-label">
+                  <CircleAlert size={14} aria-hidden="true" />
+                  Mismatched results
+                </p>
+                <p className="stat-value">{display(kpis.results.mismatched)}</p>
+              </div>
+              <div className="stat-card">
+                <p className="stat-label">
+                  <Coins size={14} aria-hidden="true" />
+                  Unresolved difference
+                </p>
+                <p className="stat-value">
+                  {display(kpis.impact.absoluteUnresolvedDifference)}
+                </p>
+              </div>
+              <div className="stat-card">
+                <p className="stat-label">
+                  <ShieldAlert size={14} aria-hidden="true" />
+                  High-severity unresolved
+                </p>
+                <p className="stat-value">{display(kpis.impact.highSeverityUnresolved)}</p>
+              </div>
+            </div>
+            <p className="muted stat-provenance">
+              Facts from reporting-service · generated {display(kpis.generatedAt)}
+            </p>
+            <div className="card">
+              <h2>Cases by category</h2>
+              {kpis.cases.byCategory.length === 0 ? (
+                <p className="muted">No cases recorded yet.</p>
+              ) : (
+                <CategoryBarChart data={kpis.cases.byCategory} />
+              )}
+            </div>
+          </>
+        )}
+      </section>
+
       <div className="card">
         <h2>Service status</h2>
         <table className="grid">
@@ -88,6 +159,7 @@ export default async function Home() {
                 <td>
                   <Badge status={h.state} />
                 </td>
+
                 <td className="muted">{h.detail}</td>
               </tr>
             ))}

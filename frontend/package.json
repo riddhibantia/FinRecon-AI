@@ -11,9 +11,11 @@
     "test": "tsc --noEmit && tsc -p tsconfig.test.json && node --test test/*.test.mjs"
   },
   "dependencies": {
+    "lucide-react": "^1.47.0",
     "next": "^16.3.5",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@types/node": "20.14.10",

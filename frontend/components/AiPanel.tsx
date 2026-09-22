@@ -119,61 +119,79 @@ export default function AiPanel({ exceptionId }: { exceptionId: string }) {
           )}
 
           {result.reasons.length > 0 && (
-            <>
-              <h3>Review notes</h3>
-              <ul>
-                {result.reasons.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </>
+            <details className="accordion" open>
+              <summary>
+                <span className="accordion-title">
+                  Review notes ({result.reasons.length})
+                </span>
+              </summary>
+              <div className="accordion-body">
+                <ul>
+                  {result.reasons.map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            </details>
           )}
 
           {result.evidence.length > 0 && (
-            <>
-              <h3>Evidence used</h3>
-              <table className="grid">
-                <caption className="muted">Sources cited by the investigation</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Source</th>
-                    <th scope="col">Field</th>
-                    <th scope="col">Expected</th>
-                    <th scope="col">Observed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.evidence.map((e, i) => (
-                    <tr key={i}>
-                      <td>
-                        {display(e.source_type)} {display(e.source_id)}
-                      </td>
-                      <td>{display(e.field)}</td>
-                      <td>{display(e.expected)}</td>
-                      <td>{display(e.observed)}</td>
+            <details className="accordion">
+              <summary>
+                <span className="accordion-title">
+                  Evidence used ({result.evidence.length})
+                </span>
+              </summary>
+              <div className="accordion-body">
+                <table className="grid">
+                  <caption className="muted">Sources cited by the investigation</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Source</th>
+                      <th scope="col">Field</th>
+                      <th scope="col">Expected</th>
+                      <th scope="col">Observed</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
+                  </thead>
+                  <tbody>
+                    {result.evidence.map((e, i) => (
+                      <tr key={i}>
+                        <td>
+                          {display(e.source_type)} {display(e.source_id)}
+                        </td>
+                        <td>{display(e.field)}</td>
+                        <td>{display(e.expected)}</td>
+                        <td>{display(e.observed)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
           )}
 
           {result.citations.length > 0 && (
-            <>
-              <h3>Policy citations</h3>
-              {result.citations.map((c, i) => (
-                <div key={i}>
-                  <p>
-                    <strong>
-                      {display(c.document)} v{display(c.version)}
-                    </strong>{" "}
-                    · {display(c.section)} · page {display(String(c.page))} · score{" "}
-                    {display(String(c.score))}
-                  </p>
-                  <pre className="excerpt">{c.excerpt}</pre>
-                </div>
-              ))}
-            </>
+            <details className="accordion">
+              <summary>
+                <span className="accordion-title">
+                  Policy citations ({result.citations.length})
+                </span>
+              </summary>
+              <div className="accordion-body">
+                {result.citations.map((c, i) => (
+                  <div key={i}>
+                    <p>
+                      <strong>
+                        {display(c.document)} v{display(c.version)}
+                      </strong>{" "}
+                      · {display(c.section)} · page {display(String(c.page))} · score{" "}
+                      {display(String(c.score))}
+                    </p>
+                    <pre className="excerpt">{c.excerpt}</pre>
+                  </div>
+                ))}
+              </div>
+            </details>
           )}
 
           {result.draft && (

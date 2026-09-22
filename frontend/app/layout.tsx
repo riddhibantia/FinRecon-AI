@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3000"),
@@ -34,14 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <span>Policy-gated AI</span>
           <span>Human review required</span>
         </div>
-        <nav className="nav" aria-label="Primary">
-          <a href="/" className="nav-brand">
-            FinRecon AI
-          </a>
-          <a href="/runs">Runs</a>
-          <a href="/cases">Cases</a>
-          <a href="/metrics">Metrics</a>
-        </nav>
+        <NavBar />
         <main id="main" className="page" tabIndex={-1}>
           {children}
         </main>
