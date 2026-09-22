@@ -38,6 +38,11 @@ returns the upstream value otherwise.
   because the UI cannot build validated snapshots.
 - The AI layer cannot bypass deterministic reconciliation or database
   controls: it reads P4 evidence and P7 excerpts, writes nothing.
+- Prompt-injection text inside retrieved policies or case notes is data, not
+  instruction. `ai-service/tests/test_prompt_injection.py` pins that injected
+  text cannot add claims to the summary, cannot change the draft action, and
+  cannot bypass `human_approval_required` — the grounded-summary contract
+  plus citation source verification hold even against a forged policy hit.
 
 ## Input validation and auditability
 
