@@ -1,0 +1,45 @@
+[
+  {
+    "name": "clean match",
+    "payment": {"amount": "10000.00", "currency": "INR", "status": "SUCCESS", "event_hours_ago": 2},
+    "ledger": {"gross": "10000.00", "fee": "250.00", "net": "9750.00", "status": "SUCCESS"},
+    "settlement": {"settled": "9750.00", "fee": "250.00", "status": "SUCCESS", "day_offset": 1},
+    "expect": {"match_status": "MATCHED", "case": false}
+  },
+  {
+    "name": "missing settlement",
+    "payment": {"amount": "10000.00", "currency": "INR", "status": "SUCCESS", "event_hours_ago": 2},
+    "ledger": {"gross": "10000.00", "fee": "250.00", "net": "9750.00", "status": "SUCCESS"},
+    "settlement": null,
+    "expect": {"match_status": "MISMATCHED", "mismatch_type": "MISSING_SETTLEMENT", "case": true}
+  },
+  {
+    "name": "fee variance",
+    "payment": {"amount": "10000.00", "currency": "INR", "status": "SUCCESS", "event_hours_ago": 2},
+    "ledger": {"gross": "10000.00", "fee": "250.00", "net": "9750.00", "status": "SUCCESS"},
+    "settlement": {"settled": "9750.00", "fee": "300.00", "status": "SUCCESS", "day_offset": 1},
+    "expect": {"match_status": "MISMATCHED", "mismatch_type": "FEE_VARIANCE", "case": true}
+  },
+  {
+    "name": "amount mismatch",
+    "payment": {"amount": "10000.00", "currency": "INR", "status": "SUCCESS", "event_hours_ago": 2},
+    "ledger": {"gross": "9500.00", "fee": "250.00", "net": "9250.00", "status": "SUCCESS"},
+    "settlement": {"settled": "9500.00", "fee": "250.00", "status": "SUCCESS", "day_offset": 1},
+    "expect": {"match_status": "MISMATCHED", "mismatch_type": "AMOUNT_MISMATCH", "case": true}
+  },
+  {
+    "name": "duplicate settlement",
+    "payment": {"amount": "10000.00", "currency": "INR", "status": "SUCCESS", "event_hours_ago": 2},
+    "ledger": {"gross": "10000.00", "fee": "250.00", "net": "9750.00", "status": "SUCCESS"},
+    "settlement": {"settled": "9750.00", "fee": "250.00", "status": "SUCCESS", "day_offset": 1,
+                   "duplicate": true},
+    "expect": {"match_status": "MISMATCHED", "mismatch_type": "DUPLICATE_SETTLEMENT", "case": true}
+  },
+  {
+    "name": "late settlement",
+    "payment": {"amount": "10000.00", "currency": "INR", "status": "SUCCESS", "event_hours_ago": 120},
+    "ledger": {"gross": "10000.00", "fee": "250.00", "net": "9750.00", "status": "SUCCESS"},
+    "settlement": {"settled": "9750.00", "fee": "250.00", "status": "SUCCESS", "day_offset": 1},
+    "expect": {"match_status": "MISMATCHED", "mismatch_type": "LATE_SETTLEMENT", "case": true}
+  }
+]

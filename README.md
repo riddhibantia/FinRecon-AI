@@ -6,7 +6,7 @@ Spec: `Doc/FINRECON_MASTER.md` is authoritative. `Doc/AGENT_HANDOFF.md` is the e
 
 ## What P0 contains
 
-- 5 Spring Boot skeletons (Java 21, Spring Boot 3.2.5, Gradle): gateway, ingestion, reconciliation, exception, reporting. Each exposes `GET /api/health` and Actuator `GET /actuator/health`.
+- 1 Spring Boot monolith (Java 21, Spring Boot 3.2.5, Gradle): `services/finrecon-app` — ingestion, reconciliation, exception/case, and reporting APIs on port 8080. Exposes `GET /api/health` and Actuator `GET /actuator/health`.
 - 1 FastAPI skeleton (`ai-service/app.py`): `GET /health`. Subpackages `classifier`, `rag`, `agent`, `tools`, `evaluation` are empty placeholders.
 - 1 Next.js skeleton (`frontend/`): home page plus `GET /api/health`.
 - `docker-compose.yml`: PostgreSQL only (pgvector image for future P7, RAG not enabled).
@@ -58,24 +58,21 @@ npm run build
 cd ..
 ```
 
-## Run locally (P0)
+## Run locally (monolith)
 
-Each service runs in its own terminal. No DB needed for health checks.
+One Java app now serves every backend API on port 8080. No Docker needed
+except optionally for PostgreSQL.
 
 ```powershell
-# Terminal 1-5 (Java, one per service)
-gradle :services:gateway-service:bootRun
-gradle :services:ingestion-service:bootRun
-gradle :services:reconciliation-service:bootRun
-gradle :services:exception-service:bootRun
-gradle :services:reporting-service:bootRun
+# Terminal 1 (Java monolith — ingestion + reconciliation + cases + reporting)
+gradle :services:finrecon-app:bootRun
 
-# Terminal 6 (Python)
+# Terminal 2 (Python AI service — optional, only when testing the classifier)
 cd ai-service
 python -m uvicorn app:app --port 8000
 cd ..
 
-# Terminal 7 (frontend)
+# Terminal 3 (frontend)
 cd frontend
 npm install
 npm run dev
@@ -92,11 +89,7 @@ docker compose up postgres
 
 | Service | URL |
 |---|---|
-| gateway-service | http://localhost:8080/api/health and /actuator/health |
-| ingestion-service | http://localhost:8081/api/health and /actuator/health |
-| reconciliation-service | http://localhost:8082/api/health and /actuator/health |
-| exception-service | http://localhost:8083/api/health and /actuator/health |
-| reporting-service | http://localhost:8084/api/health and /actuator/health |
+| finrecon-app | http://localhost:8080/api/health and /actuator/health |
 | ai-service | http://localhost:8000/health |
 | frontend | http://localhost:3000/api/health |
 
@@ -110,7 +103,7 @@ Invoke-RestMethod http://localhost:8000/health
 Invoke-RestMethod http://localhost:3000/api/health
 ```
 
-## P2 ingestion (ingestion-service :8081, needs PostgreSQL at runtime)
+## P2 ingestion (finrecon-app :8080, needs PostgreSQL at runtime)
 
 JSON batch endpoints (`application/json` array, 200 with counts; 400 on
 empty/unparseable body):
@@ -134,7 +127,7 @@ references are rejected. Every response is a `BatchResult`
 carries `X-Request-Id`. Repeats are idempotent (payments via
 `UNIQUE(external_txn_id)`; ledger/settlement via exact-duplicate match).
 
-## P3 reconciliation (reconciliation-service :8082, needs PostgreSQL at runtime)
+## P3 reconciliation (finrecon-app :8080, needs PostgreSQL at runtime)
 
 - `POST /api/reconcile?sourceSet=NAME` — runs the deterministic engine
   (rule version `1.0.0`) over all known payments; returns run summary
@@ -145,7 +138,7 @@ carries `X-Request-Id`. Repeats are idempotent (payments via
 - Checks in fixed order: duplicate, missing, amount, unknown, fee, net,
   FX, status, late settlement. No LLM/ML decides numeric truth.
 
-## P4 cases (exception-service :8083, needs PostgreSQL at runtime)
+## P4 cases (finrecon-app :8080, needs PostgreSQL at runtime)
 
 - `POST /api/cases/sync {"runId":"..."}` — opens one case per MISMATCHED
   result (idempotent; matched results never become cases).
@@ -154,6 +147,16 @@ carries `X-Request-Id`. Repeats are idempotent (payments via
   resolution actions, audit trail, rule version.
 - `POST /api/cases/{id}/assign`, `/resolve`, `/escalate` — lifecycle
   transitions; illegal moves are 422 with `ILLEGAL_TRANSITION`.
+- `POST /api/cases/{id}/feedback` — FR-11 append-only analyst
+  confirm/correct; audited and shown on the case detail.
+
+## FR-13 reporting (finrecon-app :8080, needs PostgreSQL at runtime)
+
+- `GET /api/reports/kpis` — runs, results, auto-match rate, case counts by
+  status/category/severity, unresolved impact, feedback totals. Read-only
+  projections over the shared schema; nothing is recomputed downstream.
+- `GET /api/reports/ageing` — unresolved counts against the two-calendar-day
+  escalation boundary and the oldest unresolved case.
 
 ## P5 async path (same service, needs Kafka/Redis only when enabled)
 
@@ -182,7 +185,8 @@ npm run dev   # http://localhost:3000
   `.env.template`); the browser calls same-origin `/api/*` proxies.
 - Pages: `/` service status, `/runs` start-a-run + `/runs/[runId]` results,
   `/cases` filterable queue, `/cases/[id]` evidence, sources, cited AI
-  investigation, lifecycle actions, audit trail.
+  investigation, lifecycle actions, analyst corrections (FR-11), audit trail,
+  `/metrics` operational KPIs and ageing (FR-13).
 - The UI repeats backend facts verbatim and computes no financial truth.
   Unreachable backends render honest error panels (verified live against
   stopped backends); the AI panel reports 503/unreachable without guessing.

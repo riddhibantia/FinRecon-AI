@@ -1,0 +1,30 @@
+{
+  "measured_at": "2026-09-18T14:31:42.719567+00:00",
+  "produce_path": "POST http://localhost:8081/api/ingest/payments with finrecon.messaging.enabled=true: IngestionService.publishAccepted -> IngestEventPublisher -> IngestEvent envelope keyed by external_txn_id, X-Request-Id header",
+  "topic": "finrecon.ingest.v1",
+  "dead_letter_topic": "finrecon.ingest.v1-dlt",
+  "consumer_group": "finrecon-ingestion",
+  "load_tag_prefix": "PERF-K-3724b5ca-",
+  "produced_messages": 2000,
+  "ingest_accepted": 2000,
+  "ingest_duplicates": 0,
+  "ingest_rejected": 0,
+  "sync_ingest_seconds": 15.62,
+  "sync_ingest_messages_per_second": 128.01,
+  "envelopes_observed_on_topic": 2000,
+  "topic_end_offsets_note": "ok",
+  "publisher_check": "OK (envelope count matches accepted rows)",
+  "stored_rows": 2000,
+  "dlt_arrivals": 0,
+  "dlt_note": "ok",
+  "unexplained": 0,
+  "unexplained_formula": "produced - stored - dlt",
+  "consumer_group_state": "ACTIVE",
+  "total_lag": 0,
+  "consumer_group_describe": "GROUP              TOPIC              PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                        HOST            CLIENT-ID\nfinrecon-ingestion finrecon.ingest.v1 0          2019            2019            0               consumer-finrecon-ingestion-4-da8661a0-b90b-455f-812c-23dc9f883bcb /172.18.0.6     consumer-finrecon-ingestion-4",
+  "replica_note": "P5 ingests synchronously first and publishes the same rows as a replica: the consumer dedupes by eventId and replays through the idempotent P2 store, so stored_rows comes from the synchronous path and the replay adds no rows. unexplained = 0 therefore means no loss on either path, not that a second copy was stored.",
+  "not_measured": {
+    "isolated_kafka_produce_seconds": "IngestEventPublisher.send() is fire-and-forget with no completion callback, so publish time sits inside the synchronous ingest call and cannot be timed separately",
+    "broker_side_throughput": "no JMX exporter or broker metric scrape is configured in this deployment, so throughput is reported from the producer path only"
+  }
+}
