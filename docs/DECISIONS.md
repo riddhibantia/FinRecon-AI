@@ -165,3 +165,25 @@ P13 decision log (2026-09-22):
 - Dependency security gate: pip-audit + npm audit (high) in CI. Remediated: fastapi 0.141.1/starlette 1.6.0, aiohttp 3.14.3, anyio 4.14.2, cryptography 50.0.1, h2 4.4.1, pygments 2.20.0, requests 2.33.0, urllib3 2.7.0, pytest 9.0.3; ecdsa/python-jose removed (unused). Frontend: Next.js 14.2.5 to 16.3.5 + React 19 (only fix line for the 2026 Next advisory set; params/searchParams are now awaited Promises; lint script moved from removed `next lint` to direct `eslint`). torch (+cpu local wheel) is not auditable on PyPI - noted, local dev only.
 - OWASP Java dependency scan deferred: the plugin needs an NVD API key; revisit when a key is provisioned.
 
+P13 monolith decision log (2026-09-22, 8GB footprint):
+
+- Consolidated the five Spring services into `services/finrecon-app`
+  (one Spring Boot app on :8080, ~600 MB vs ~2.5 GB). Packages
+  `ingestion/`, `reconciliation/`, `exceptioncase/`, `reporting/`,
+  `shared/` preserve the bounded contexts; `settings.gradle` includes
+  only the monolith and CI builds three images (app, ai, frontend).
+- Broker-less by default: P5 messaging/Redis code removed in
+  consolidation; `docker-compose.yml` runs PostgreSQL only and apps run
+  as local processes. `data/evaluation/p13_kafka.json` is kept as a
+  historical pre-monolith measurement, marked as such in
+  `docs/METRICS.md` (ADR-002).
+- Live performance/demo not re-measured in this session (no
+  PostgreSQL/Docker in this environment): P95, throughput, and match
+  rate are recorded as not measured with the exact rerun commands;
+  nothing is estimated (`scripts/measure_performance.py` targets the
+  monolith :8080).
+- Completed the P13 doc set: extracted PRD/TRD/ARCHITECTURE from the
+  master, eight `docs/adr/` files, `docs/METRICS.md`, README retitle,
+  OPERATIONS refresh. Unrelated `DESIGN.md` / `design-mockups.html`
+  (Nike commerce) stay untracked and out of git.
+

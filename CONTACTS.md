@@ -27,6 +27,9 @@ OpenCore owns deterministic facts and product; OMP owns ML/RAG/agent.
 | Policy knowledge base / retrieval | `ai-service/rag`, `ai-service/data/policies`, `ai-service/evaluation/p7*.json` | OMP (P7) |
 | Investigation agent (LangGraph workflow, tools) | `ai-service/agent`, `ai-service/tools` | OMP (P8) |
 | Analyst dashboard | `frontend/app`, `frontend/components`, `frontend/lib` | OpenCore (P10) |
+| Analyst feedback (FR-11) | `services/finrecon-app/.../shared/domain/AnalystFeedback*`, `frontend/components/FeedbackForm.tsx`, `frontend/app/api/cases/[id]/feedback/` | OpenCore (P13) |
+| Reporting / metrics (FR-13) | `services/finrecon-app/.../reporting/`, `frontend/app/metrics/`, `frontend/app/api/reports/` | OpenCore (P13) |
+| Measured metrics + demo | `docs/METRICS.md`, `scripts/demo.py`, `scripts/measure_performance.py`, `data/demo/`, `tests/e2e/` | OpenCore (P13) |
 | Security boundaries, hygiene scan | `docs/SECURITY.md`, `tests/test_repo_hygiene.py`, `ai-service/tests/test_api_boundaries.py` | OpenCore (P11) |
 | Operations, observability, CI/CD, Docker | `docs/OPERATIONS.md`, `.github/workflows/ci.yml`, `*/Dockerfile`, `docker-compose.yml` | OpenCore (P12) |
 | Spec and execution order | `Doc/FINRECON_MASTER.md`, `Doc/AGENT_HANDOFF.md` | Shared source of truth |

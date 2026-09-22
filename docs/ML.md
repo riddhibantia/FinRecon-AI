@@ -14,7 +14,7 @@ python -m pytest tests -v
 python -m uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-Dataset generation requires Java 21, javac, and the existing Spring bootJar at `services/reconciliation-service/build/libs/reconciliation-service.jar`. Build it from the repository root with `gradle :services:reconciliation-service:bootJar` if absent. The Python-owned `P3LabelBridge.java` invokes the actual compiled engine; no Python copy of reconciliation rules assigns labels.
+Dataset generation requires Java 21, javac, and the existing Spring bootJar at `services/finrecon-app/build/libs/finrecon-app.jar`. Build it from the repository root with `gradle :services:finrecon-app:bootJar` if absent. The Python-owned `P3LabelBridge.java` invokes the actual compiled engine; no Python copy of reconciliation rules assigns labels.
 
 Artifacts are generated under ignored `ai-service/artifacts/p6/`. Model manifests record dataset, engine source, bootJar, bridge, generator, feature and training hashes; library versions; seed; rule version; classes; and supported settlement windows. Load only operator-controlled joblib files: checksums detect corruption, not a malicious operator replacing both artifact and manifest. Retrain after feature or dependency changes. `FINRECON_MODEL_DIR` selects a model directory; startup never trains.
 
