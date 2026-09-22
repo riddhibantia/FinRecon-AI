@@ -9,9 +9,8 @@ for secret-handling rules (never commit `.env` or real credentials).
 
 - Current maintainer (sole committer per `git shortlog -sne --all`):
   `riddhi` — see `git log --format="%an <%ae> %ad %s"` for history.
-- No `CODEOWNERS`, `MAINTAINERS.md`, or remote URL is configured in this
-  checkout (`git remote -v` is empty). Add a remote and `CODEOWNERS` when
-  the project moves to shared hosting.
+- Remote: `origin https://github.com/riddhibantia/FinRecon-AI.git`
+  (`git remote -v`). Add `CODEOWNERS` when the project moves to shared hosting.
 
 ## Component owners
 

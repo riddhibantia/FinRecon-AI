@@ -1,16 +1,50 @@
 # FinRecon AI — Payment Reconciliation & Exception Resolution
 
-Deterministic reconciliation of gateway, ledger, and settlement
-records; exception cases with evidence; advisory ML classification,
-policy retrieval, and tool-grounded AI investigation drafts that a
-human must approve. One Spring Boot monolith (`:8080`), one FastAPI
-ai-service (`:8000`), one Next.js dashboard (`:3000`), PostgreSQL 16
-as the system of record. Runs in ~600 MB instead of ~2.5 GB.
+![CI](https://github.com/riddhibantia/FinRecon-AI/actions/workflows/ci.yml/badge.svg)
+![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.5-6DB33F?logo=springboot&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-Spec: `Doc/FINRECON_MASTER.md` is authoritative.
-Execution order: `Doc/AGENT_HANDOFF.md`.
-Measured numbers: `docs/METRICS.md`. Decisions: `docs/DECISIONS.md`
-plus `docs/adr/`.
+> Deterministic reconciliation of gateway, ledger, and settlement records; exception cases with evidence; advisory ML classification, policy retrieval, and tool-grounded AI investigation drafts that a human must approve.
+
+## Features
+
+- **Deterministic matching** — gateway ↔ ledger ↔ settlement batches, `BigDecimal` money, `X-Request-Id` on every response, Flyway V1–V5 schema.
+- **Exception queue** — cases with evidence diffs, assign / resolve / escalate, analyst feedback loop.
+- **Advisory AI only** — classifier + policy RAG + LangGraph investigation agent; every draft carries `human_approval_required: true`.
+- **Analyst dashboard** — `/`, `/runs`, `/cases`, `/metrics` with KPI cards, ageing reports, table fallback for every chart.
+- **Honest metrics** — 52 Java + 75 AI + 17 repo + 16 frontend tests; unmeasured stays "not measured" (`docs/METRICS.md`).
+
+## Tech stack
+
+| Layer | Tech |
+|---|---|
+| Backend `:8080` | Spring Boot 3.2.5, Java 21, Gradle 8.9 (`services/finrecon-app`) |
+| AI service `:8000` | FastAPI, classifier + RAG + LangGraph agent (`ai-service/`) |
+| Frontend `:3000` | Next.js 16.3.5, React 19, recharts, lucide-react |
+| Data | PostgreSQL 16 + pgvector (Docker, postgres-only compose), Flyway, synthetic demo scenarios |
+| Ops | GitHub Actions (Java + Python + frontend + compose + Docker), JaCoCo + pytest-cov, pip/npm audit |
+
+```
+Next.js dashboard → Spring Boot monolith (:8080, system of record)
+                  → FastAPI ai-service (:8000, advisory only) → Postgres 16 + pgvector
+```
+
+## Screenshots
+
+Live captures are produced by the `screenshots` CI job (`dashboard-screenshots` artifact) — see `docs/screenshots/README.md` for regenerate steps:
+
+```
+docs/screenshots/home.png         # hero, KPI cards, category chart
+docs/screenshots/cases.png        # exception queue
+docs/screenshots/case-detail.png  # evidence tabs + sticky rail
+docs/screenshots/metrics.png      # charts + table fallback
+```
+
+> TODO for demo: commit 3–4 PNGs here (or link the CI artifact publicly) + 60-sec Loom so recruiters see it without running the stack.
 
 ## Prerequisites
 
@@ -88,7 +122,6 @@ db/migrations/ db/seed/  # Flyway-owned schema
 data/demo/               # 6 tracked scenarios (synthetic/ is gitignored)
 scripts/                 # demo.py, measure_performance.py
 docs/                    # PRD, TRD, ARCHITECTURE, DATABASE, EVENTS, ML, RAG, AGENT, SECURITY, TESTING, METRICS, DECISIONS, adr/
-Doc/FINRECON_MASTER.md, Doc/AGENT_HANDOFF.md, CONTACTS.md
 ```
 
 ## Conventions
@@ -97,3 +130,10 @@ Doc/FINRECON_MASTER.md, Doc/AGENT_HANDOFF.md, CONTACTS.md
 - Spring Boot 3.2.5, Java 21, Gradle 8.9 — do not bump without an ADR.
 - Synthetic data only. Secrets in `.env`, never committed.
 - Never invent a metric: unmeasured stays "not measured" with a reason.
+
+## For contributors
+
+Spec: `Doc/FINRECON_MASTER.md` is authoritative.
+Execution order: `Doc/AGENT_HANDOFF.md`.
+Measured numbers: `docs/METRICS.md`. Decisions: `docs/DECISIONS.md`
+plus `docs/adr/`.
