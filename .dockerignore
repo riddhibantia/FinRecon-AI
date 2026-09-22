@@ -1,0 +1,52 @@
+# Gradle / Java
+.gradle/
+build/
+out/
+*.class
+*.jar
+*.war
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/test-dist/
+frontend/tsconfig.tsbuildinfo
+
+# AI service artifacts (mounted at runtime)
+ai-service/artifacts/
+
+# Data (synthetic only in repo, never real card data)
+data/synthetic/
+
+# Env / secrets
+.env
+.env.local
+.env.*
+
+# Logs
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Docs (not needed in images; licenses are deliberately kept)
+docs/
+Doc/
+
+# Test files
+tests/
+db/tests/
+ai-service/tests/

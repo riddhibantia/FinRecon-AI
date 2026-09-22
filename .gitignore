@@ -27,6 +27,7 @@ out/
 # Env / secrets - never commit real values
 .env
 .env.local
+.env.*
 
 # OS / IDE
 .DS_Store
@@ -39,3 +40,14 @@ Thumbs.db
 data/synthetic/*
 !data/synthetic/.gitkeep
 !data/synthetic/README.md
+
+# AI artifacts — trained models, datasets, and local database snapshots
+# never belong in git; keep only the ones already published on purpose.
+ai-service/artifacts/pgdata/
+ai-service/.pytest_cache/
+
+# Run logs / coverage
+*.log
+coverage/
+htmlcov/
+.coverage

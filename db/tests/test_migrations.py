@@ -157,7 +157,7 @@ def test_seed_stores_three_linked_source_records():
 
 
 def test_java_entities_match_migration_tables():
-    domain = REPO / "services" / "ingestion-service" / "src" / "main" / "java"
+    domain = REPO / "services" / "finrecon-app" / "src" / "main" / "java"
     mapping = {
         "Payment.java": "payments",
         "LedgerEntry.java": "ledger_entries",

@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // JPA + Flyway (from the three core services)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.flywaydb:flyway-core'
+
+    // CSV parsing (from ingestion-service)
+    implementation 'org.apache.commons:commons-csv:1.10.0'
+
+    // JDBC for reporting read-only queries (from reporting-service)
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // H2 serves @SpringBootTest only (Flyway off, create-drop). It never
+    // validates the PostgreSQL migrations; see db/tests + DATABASE.md.
+    testRuntimeOnly 'com.h2database:h2'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // Lets filesystem:db/migrations resolve when tests need the repo root.
+    workingDir = rootDir
+}
