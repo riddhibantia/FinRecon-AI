@@ -47,6 +47,12 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: ai-service/requirements.txt
+      - uses: actions/setup-java@v4
+        with:
+          # The P3 label bridge compiles against the Java 21 bootJar, so the
+          # fixture's JAVA_HOME toolchain must be 21, not the runner default.
+          distribution: temurin
+          java-version: "21"
       - run: pip install -r requirements.txt -r requirements-dev.txt
         working-directory: ai-service
       # Full OMP regression: classifier, RAG, agent, boundaries.
