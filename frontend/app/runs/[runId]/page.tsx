@@ -22,12 +22,13 @@ async function load(runId: string): Promise<{ run: RunSummary; results: ResultVi
   }
 }
 
-export default async function RunDetailPage({ params }: { params: { runId: string } }) {
-  const data = await load(params.runId);
+export default async function RunDetailPage({ params }: { params: Promise<{ runId: string }> }) {
+  const { runId } = await params;
+  const data = await load(runId);
   if (!data) {
     return (
       <Notice kind="error" title="Run unavailable">
-        The reconciliation service did not return run {params.runId}. It may be unreachable
+        The reconciliation service did not return run {runId}. It may be unreachable
         or the run may not exist.
       </Notice>
     );
@@ -48,12 +49,13 @@ export default async function RunDetailPage({ params }: { params: { runId: strin
           <p className="muted">This run produced no per-payment results.</p>
         ) : (
           <table className="grid">
+            <caption className="muted">Run results</caption>
             <thead>
               <tr>
-                <th>Transaction</th>
-                <th>Status</th>
-                <th>Mismatch</th>
-                <th>Difference</th>
+                <th scope="col">Transaction</th>
+                <th scope="col">Status</th>
+                <th scope="col">Mismatch</th>
+                <th scope="col">Difference</th>
               </tr>
             </thead>
             <tbody>

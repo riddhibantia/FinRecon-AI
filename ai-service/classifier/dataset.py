@@ -15,8 +15,8 @@ import zipfile
 from classifier.schema import CLASSES, Snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_JAR = ROOT / "services/reconciliation-service/build/libs/reconciliation-service.jar"
-ENGINE_SOURCE = ROOT / "services/reconciliation-service/src/main/java/com/finrecon/reconciliation/reconcile/ReconciliationEngine.java"
+DEFAULT_JAR = ROOT / "services/finrecon-app/build/libs/finrecon-app.jar"
+ENGINE_SOURCE = ROOT / "services/finrecon-app/src/main/java/com/finrecon/reconciliation/reconcile/ReconciliationEngine.java"
 
 
 def digest(path):
@@ -98,8 +98,21 @@ def label_snapshots(snapshots, jar=DEFAULT_JAR):
                     destination.parent.mkdir(parents=True, exist_ok=True)
                     destination.write_bytes(archive.read(name))
         classpath = os.pathsep.join([str(root / "BOOT-INF/classes"), str(root / "BOOT-INF/lib/*"), str(root)])
-        subprocess.run(["javac", "-encoding", "UTF-8", "-cp", classpath, "-d", str(root), str(bridge)], check=True, capture_output=True, text=True)
-        completed = subprocess.run(["java", "-cp", classpath, "P3LabelBridge"],
+        # Prefer the JAVA_HOME toolchain: the bootJar is class version 65
+        # (Java 21), so an older javac earlier on PATH must not win.
+        javac = "javac"
+        java = "java"
+        java_home = os.environ.get("JAVA_HOME")
+        if java_home:
+            suffix = ".exe" if os.name == "nt" else ""
+            javac_candidate = Path(java_home) / "bin" / f"javac{suffix}"
+            java_candidate = Path(java_home) / "bin" / f"java{suffix}"
+            if javac_candidate.is_file():
+                javac = str(javac_candidate)
+            if java_candidate.is_file():
+                java = str(java_candidate)
+        subprocess.run([javac, "-encoding", "UTF-8", "-cp", classpath, "-d", str(root), str(bridge)], check=True, capture_output=True, text=True)
+        completed = subprocess.run([java, "-cp", classpath, "P3LabelBridge"],
             input="\n".join(json_bytes(source).decode() for source in snapshots) + "\n",
             check=True, capture_output=True, text=True, encoding="utf-8")
         return [json.loads(line) for line in completed.stdout.splitlines()]

@@ -1,0 +1,6 @@
+# CI-only measurement and scanning. Never copied into the runtime image.
+-r requirements.txt
+pytest==9.0.3
+pytest-cov==6.0.0
+pip-audit==2.7.3
+

@@ -159,3 +159,9 @@ Live-Docker decision log (machine with Docker, first real deployment):
 - Rebuilds must be verified by image age + migration log lines: an
   'up -d --build' with empty output left stale images running twice.
   Trust 'Migrating schema to version N', not the exit code.
+
+P13 decision log (2026-09-22):
+- Coverage gates: JaCoCo XML/HTML per Gradle build; ai-service line coverage 87% via pytest-cov (dev-only, never in the image).
+- Dependency security gate: pip-audit + npm audit (high) in CI. Remediated: fastapi 0.141.1/starlette 1.6.0, aiohttp 3.14.3, anyio 4.14.2, cryptography 50.0.1, h2 4.4.1, pygments 2.20.0, requests 2.33.0, urllib3 2.7.0, pytest 9.0.3; ecdsa/python-jose removed (unused). Frontend: Next.js 14.2.5 to 16.3.5 + React 19 (only fix line for the 2026 Next advisory set; params/searchParams are now awaited Promises; lint script moved from removed `next lint` to direct `eslint`). torch (+cpu local wheel) is not auditable on PyPI - noted, local dev only.
+- OWASP Java dependency scan deferred: the plugin needs an NVD API key; revisit when a key is provisioned.
+

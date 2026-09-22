@@ -22,9 +22,13 @@ const CATEGORIES = [
 
 async function loadQueue(params: URLSearchParams): Promise<CaseSummary[] | null> {
   try {
-    const res = await fetch(buildCaseQueueUrl(caseApiOrigin(), params), { cache: "no-store" });
+    const res = await fetch(buildCaseQueueUrl(caseApiOrigin(), params), {
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) return null;
-    return (await res.json()) as CaseSummary[];
+    const data = (await res.json()) as unknown;
+    return Array.isArray(data) ? (data as CaseSummary[]) : null;
   } catch {
     return null;
   }
@@ -33,23 +37,27 @@ async function loadQueue(params: URLSearchParams): Promise<CaseSummary[] | null>
 export default async function CasesPage({
   searchParams,
 }: {
-  searchParams: { status?: string; category?: string; assignedTo?: string };
+  searchParams: Promise<{ status?: string; category?: string; assignedTo?: string }>;
 }) {
+  const sp = await searchParams;
   const params = new URLSearchParams();
-  if (searchParams.status) params.set("status", searchParams.status);
-  if (searchParams.category) params.set("category", searchParams.category);
-  if (searchParams.assignedTo) params.set("assignedTo", searchParams.assignedTo);
+  if (sp.status) params.set("status", sp.status);
+  if (sp.category) params.set("category", sp.category);
+  if (sp.assignedTo) params.set("assignedTo", sp.assignedTo);
   const cases = await loadQueue(params);
 
   return (
     <>
       <h1>Exception queue</h1>
+      <p className="muted">
+        Filtered analyst queue. Facts come from the exception service verbatim.
+      </p>
       <div className="card">
-        <form method="get">
+        <form method="get" aria-label="Filter cases">
           <div className="row">
-            <label className="field">
+            <label className="field" htmlFor="filter-status">
               Status
-              <select name="status" defaultValue={searchParams.status ?? ""}>
+              <select id="filter-status" name="status" defaultValue={sp.status ?? ""}>
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {s === "" ? "Any" : s}
@@ -57,9 +65,13 @@ export default async function CasesPage({
                 ))}
               </select>
             </label>
-            <label className="field">
+            <label className="field" htmlFor="filter-category">
               Category
-              <select name="category" defaultValue={searchParams.category ?? ""}>
+              <select
+                id="filter-category"
+                name="category"
+                defaultValue={sp.category ?? ""}
+              >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {c === "" ? "Any" : c}
@@ -67,11 +79,22 @@ export default async function CasesPage({
                 ))}
               </select>
             </label>
-            <label className="field">
+            <label className="field" htmlFor="filter-assignee">
               Assigned to
-              <input name="assignedTo" defaultValue={searchParams.assignedTo ?? ""} />
+              <input
+                id="filter-assignee"
+                name="assignedTo"
+                defaultValue={sp.assignedTo ?? ""}
+                maxLength={128}
+                autoComplete="off"
+              />
             </label>
             <button type="submit">Filter</button>
+            {(sp.status || sp.category || sp.assignedTo) && (
+              <a href="/cases" className="btn secondary btn-sm">
+                Clear filters
+              </a>
+            )}
           </div>
         </form>
       </div>
@@ -82,19 +105,24 @@ export default async function CasesPage({
           shown rather than stale or guessed ones.
         </Notice>
       ) : cases.length === 0 ? (
-        <p className="muted">No cases match these filters.</p>
+        <p className="muted" role="status">
+          No cases match these filters.
+        </p>
       ) : (
         <div className="card">
           <table className="grid">
+            <caption className="muted">
+              {cases.length} cases {cases.length >= 500 ? "(capped at 500)" : ""}
+            </caption>
             <thead>
               <tr>
-                <th>Case</th>
-                <th>Transaction</th>
-                <th>Category</th>
-                <th>Severity</th>
-                <th>Status</th>
-                <th>Assignee</th>
-                <th>Difference</th>
+                <th scope="col">Case</th>
+                <th scope="col">Transaction</th>
+                <th scope="col">Category</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Status</th>
+                <th scope="col">Assignee</th>
+                <th scope="col">Difference</th>
               </tr>
             </thead>
             <tbody>

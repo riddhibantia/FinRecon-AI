@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { buildCaseActionUrl, caseApiOrigin } from "@/lib/backend";
 import { proxyJson } from "@/lib/proxy";
 
-export async function POST(request: Request, { params }: { params: { id: string; action: string } }) {
-  const target = buildCaseActionUrl(caseApiOrigin(), params.id, params.action);
+export async function POST(request: Request, { params }: { params: Promise<{ id: string; action: string }> }) {
+  const { id, action } = await params;
+  const target = buildCaseActionUrl(caseApiOrigin(), id, action);
   if (!target) {
     return NextResponse.json(
-      { error: "UNKNOWN_ACTION", message: `Case action not supported: ${params.action}` },
+      { error: "UNKNOWN_ACTION", message: `Case action not supported: ${action}` },
       { status: 404 },
     );
   }
