@@ -16,6 +16,7 @@
 - **Exception queue** — cases with evidence diffs, assign / resolve / escalate, analyst feedback loop.
 - **Advisory AI only** — classifier + policy RAG + LangGraph investigation agent; every draft carries `human_approval_required: true`.
 - **Analyst dashboard** — `/`, `/runs`, `/cases`, `/metrics` with KPI cards, ageing reports, table fallback for every chart.
+- **Motion UI (Rare UI, credited in-app)** — odometer KPI counters, notification bell with live open-case count, emoji quick-tags on feedback, in-place confirm on escalation.
 - **Honest metrics** — 52 Java + 75 AI + 17 repo + 16 frontend tests; unmeasured stays "not measured" (`docs/METRICS.md`).
 
 ## Tech stack

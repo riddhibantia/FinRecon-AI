@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Notice } from "@/components/ui";
+import { DeleteButton } from "@/components/ui/delete-button";
 
 async function postAction(
   exceptionId: string,
@@ -42,6 +43,7 @@ export default function CaseActions({
   const [resolveNotes, setResolveNotes] = useState("");
   const [resolveAction, setResolveAction] = useState("CONFIRMED");
   const [escalateNotes, setEscalateNotes] = useState("");
+  const escalateRef = useRef<HTMLFormElement>(null);
 
   async function run(action: string, body: Record<string, string>) {
     setPending(true);
@@ -131,6 +133,7 @@ export default function CaseActions({
               </form>
               <form
                 aria-label="Escalate case"
+                ref={escalateRef}
                 onSubmit={(e) => {
                   e.preventDefault();
                   void run("escalate", {
@@ -150,9 +153,15 @@ export default function CaseActions({
                       maxLength={500}
                     />
                   </label>
-                  <button type="submit" disabled={pending} aria-busy={pending} className="secondary">
-                    Escalate
-                  </button>
+                  {/* RareUI in-place confirm: the bin opens a confirm step, then escalates. */}
+                  <span className="field">
+                    Escalate · confirm
+                    <DeleteButton
+                      onConfirm={() => escalateRef.current?.requestSubmit()}
+                      aria-label="Escalate case (asks for confirmation)"
+                    />
+                    <small className="muted">Bin opens an in-place confirm, then escalates.</small>
+                  </span>
                 </div>
               </form>
             </>

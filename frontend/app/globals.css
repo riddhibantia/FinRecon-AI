@@ -1,6 +1,13 @@
-/* FinRecon AI — Nike DESIGN.md system (DESIGN.md reference) */
+@import "tailwindcss";
+
+/* RareUI bridge: map the one shadcn token used by vendored components. */
+@theme {
+  --color-foreground: #111111;
+}
+
+/* FinRecon AI design tokens (custom palette; Tailwind utilities available for Rare UI components) */
 :root {
-  /* Nike chrome palette — canvas + soft-cloud carry ~95% of surface */
+  /* Neutral chrome palette — canvas + soft-cloud carry ~95% of surface */
   --ink: #111111;
   --on-primary: #ffffff;
   --canvas: #ffffff;
@@ -448,6 +455,7 @@ pre.excerpt {
   font-size: 32px;
   font-weight: 500;
   line-height: 1.2;
+  min-height: 1.2em;
   color: var(--ink);
   overflow-wrap: anywhere;
 }

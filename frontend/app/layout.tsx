@@ -40,7 +40,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         <footer className="footer">
-          FinRecon AI · Facts from backends only — never guesses · AI ends at human review
+          FinRecon AI · Facts from backends only — never guesses · AI ends at human review ·{" "}
+          Motion components by{" "}
+          <a href="https://www.rareui.com" target="_blank" rel="noreferrer">
+            Rare UI
+          </a>
         </footer>
       </body>
     </html>

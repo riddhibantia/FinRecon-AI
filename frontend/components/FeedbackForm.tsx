@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Notice } from "@/components/ui";
+import { EmojiReaction } from "@/components/ui/emoji-reaction";
 
 // FR-11: the analyst confirms or corrects the classification. The form never
 // rewrites the deterministic category; it records the correction as feedback.
@@ -93,6 +94,16 @@ export default function FeedbackForm({
           <button type="submit" disabled={pending} aria-busy={pending}>
             {pending ? "Recording…" : "Record correction"}
           </button>
+          {/* RareUI quick tag: taps an emoji sentiment into the reason field. */}
+          <span className="field">
+            Quick tag
+            <EmojiReaction
+              size="sm"
+              onReact={(name) =>
+                setReason((r) => (r ? `${r} [${name}]` : `[${name}]`))
+              }
+            />
+          </span>
         </div>
       </form>
       <div aria-live="polite">

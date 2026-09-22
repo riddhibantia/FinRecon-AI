@@ -5,6 +5,7 @@ import { display } from "@/lib/format";
 import type { KpiReport } from "@/lib/types";
 import { Badge, Notice } from "@/components/ui";
 import { CategoryBarChart } from "@/components/CategoryBarChart";
+import { StatCounter } from "@/components/StatCounter";
 
 export const dynamic = "force-dynamic";
 
@@ -100,30 +101,32 @@ export default async function Home() {
                   <CircleDot size={14} aria-hidden="true" />
                   Open cases
                 </p>
-                <p className="stat-value">{display(kpis.cases.open)}</p>
+                <StatCounter value={kpis.cases.open} />
               </div>
               <div className="stat-card">
                 <p className="stat-label">
                   <CircleAlert size={14} aria-hidden="true" />
                   Mismatched results
                 </p>
-                <p className="stat-value">{display(kpis.results.mismatched)}</p>
+                <StatCounter value={kpis.results.mismatched} />
               </div>
               <div className="stat-card">
                 <p className="stat-label">
                   <Coins size={14} aria-hidden="true" />
                   Unresolved difference
                 </p>
-                <p className="stat-value">
-                  {display(kpis.impact.absoluteUnresolvedDifference)}
-                </p>
+                <StatCounter
+                  value={kpis.impact.absoluteUnresolvedDifference}
+                  prefix={<span>₹</span>}
+                  grouping="indian"
+                />
               </div>
               <div className="stat-card">
                 <p className="stat-label">
                   <ShieldAlert size={14} aria-hidden="true" />
                   High-severity unresolved
                 </p>
-                <p className="stat-value">{display(kpis.impact.highSeverityUnresolved)}</p>
+                <StatCounter value={kpis.impact.highSeverityUnresolved} />
               </div>
             </div>
             <p className="muted stat-provenance">

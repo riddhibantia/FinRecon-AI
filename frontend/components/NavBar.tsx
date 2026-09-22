@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 const LINKS = [
   { href: "/runs", label: "Runs" },
@@ -17,6 +18,21 @@ const LINKS = [
 export default function NavBar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [openCases, setOpenCases] = useState(0);
+
+  // Live open-case count for the bell badge. Fails silent (badge hides at 0).
+  useEffect(() => {
+    let live = true;
+    fetch("/api/cases?status=OPEN", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => {
+        if (live && Array.isArray(d)) setOpenCases(d.length);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [pathname]);
 
   function isActive(href: string): boolean {
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -57,6 +73,15 @@ export default function NavBar() {
             {l.label}
           </Link>
         ))}
+        {/* RareUI bell: swings + rolls when the open-case count lands. */}
+        <NotificationBell
+          count={openCases}
+          max={99}
+          size={34}
+          color="red"
+          aria-label={`${openCases} open cases`}
+          title="Open cases"
+        />
       </div>
     </nav>
   );
