@@ -22,12 +22,26 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: gradle/actions/setup-gradle@v3
+        with:
+          # Repo pins Gradle 8.9 (Dockerfile, local toolchain); setup-gradle
+          # defaults to 9.x, whose internal APIs break this build.
+          gradle-version: "8.9"
       - run: gradle clean build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: finrecon-bootjar
+          path: services/finrecon-app/build/libs/*.jar
+          if-no-files-found: error
 
   python-ai:
     runs-on: ubuntu-latest
+    needs: [java]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: finrecon-bootjar
+          path: services/finrecon-app/build/libs/
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -47,6 +61,7 @@ jobs:
         with:
           python-version: "3.11"
       # Migration/schema validation + tracked-file hygiene (stdlib only).
+      - run: pip install pytest
       - run: python -m pytest db/tests tests -q
 
   frontend:
@@ -111,6 +126,8 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.9"
       - name: Start monolith
         run: |
           gradle :services:finrecon-app:bootRun --no-daemon > boot.log 2>&1 &
@@ -188,6 +205,8 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.9"
       - run: gradle clean build
       - name: Summarize JaCoCo line coverage
         run: |
